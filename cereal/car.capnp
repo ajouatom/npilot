@@ -111,11 +111,6 @@ struct CarEvent @0x9b1657f34caf3ad3 {
     lkasDisabled @107;
     canBusMissing @111;
     controlsdLagging @112;
-    
-    turningIndicatorOn @113;
-    autoLaneChange @114;
-    slowingDownSpeed @115;
-    slowingDownSpeedSound @116;
 
     radarCanErrorDEPRECATED @15;
     communityFeatureDisallowedDEPRECATED @62;
@@ -214,21 +209,6 @@ struct CarState {
   fuelGauge @41 :Float32; # battery or fuel tank level from 0.0 to 1.0
   charging @43 :Bool;
 
-
-  cluSpeedMs @44 :Float32;
-  cruiseGap @45 : Int32;
-  autoHold @46 : Int32;
-  tpms @47 : Tpms;
-  vCluRatio @48 :Float32;
-  aBasis @49 :Float32;
-
-  struct Tpms {
-    fl @0 :Float32;
-    fr @1 :Float32;
-    rl @2 :Float32;
-    rr @3 :Float32;
-  }
-
   struct WheelSpeeds {
     # optional wheel speeds
     fl @0 :Float32;
@@ -244,7 +224,6 @@ struct CarState {
     speedOffset @3 :Float32;
     standstill @4 :Bool;
     nonAdaptive @5 :Bool;
-    enabledAcc @6 :Bool;
   }
 
   enum GearShifter {
@@ -282,7 +261,7 @@ struct CarState {
   }
 
   errorsDEPRECATED @0 :List(CarEvent.EventName);
-  brakeLights @19 :Bool;
+  brakeLightsDEPRECATED @19 :Bool;
 }
 
 # ******* radar state @ 20hz *******
@@ -340,16 +319,6 @@ struct CarControl {
 
   cruiseControl @4 :CruiseControl;
   hudControl @5 :HUDControl;
-
-  sccSmoother @15 :SccSmoother;
-
-  struct SccSmoother {
-    longControl @0:Bool;
-    applyMaxSpeed @1 :Float32;
-    cruiseMaxSpeed @2 :Float32;
-    logMessage @3 :Text;
-    autoTrGap @4 :UInt32;
-  }
 
   struct Actuators {
     # range from 0.0 - 1.0
@@ -418,8 +387,6 @@ struct CarControl {
       prompt @6;
       promptRepeat @7;
       promptDistracted @8;
-      
-      slowingDownSpeed @9;
     }
   }
 
@@ -515,19 +482,6 @@ struct CarParams {
     safetyParamDEPRECATED @1 :Int16;
     safetyParam2DEPRECATED @2 :UInt32;
   }
-  
-  mdpsBus @69: Int8;
-  sasBus @70: Int8;
-  sccBus @71: Int8;
-  enableAutoHold @72 :Bool;
-  hasScc13 @73 :Bool;
-  hasScc14 @74 :Bool;
-  hasEms @75 :Bool;
-  hasLfaHda @76 :Bool;
-  steerFaultMaxAngle @77 :Int16;
-  steerFaultMaxFrames @78 :Int16;
-
-  disableLateralLiveTuning @79 :Bool;
 
   struct LateralParams {
     torqueBP @0 :List(Int32);
@@ -539,9 +493,7 @@ struct CarParams {
     kpV @1 :List(Float32);
     kiBP @2 :List(Float32);
     kiV @3 :List(Float32);
-    kdBP @4 :List(Float32);
-    kdV @5 :List(Float32);
-    kf @6 :Float32;
+    kf @4 :Float32;
   }
 
   struct LateralTorqueTuning {
@@ -551,7 +503,6 @@ struct CarParams {
     friction @3 :Float32;
     kf @4 :Float32;
     steeringAngleDeadzoneDeg @5 :Float32;
-    kd @6 :Float32;
   }
 
   struct LongitudinalPIDTuning {

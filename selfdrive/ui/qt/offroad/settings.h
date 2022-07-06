@@ -7,7 +7,6 @@
 #include <QPushButton>
 #include <QStackedWidget>
 #include <QWidget>
-#include <QStackedLayout>
 
 
 #include "selfdrive/ui/qt/widgets/controls.h"
@@ -41,7 +40,6 @@ public:
 signals:
   void reviewTrainingGuide();
   void showDriverView();
-  void closeSettings();
 
 private slots:
   void poweroff();
@@ -77,48 +75,3 @@ private:
   Params params;
   QFileSystemWatcher *fs_watch;
 };
-
-
-
-
-class SelectCar : public QWidget {
-  Q_OBJECT
-public:
-  explicit SelectCar(QWidget* parent = 0);
-
-private:
-
-signals:
-  void backPress();
-  void selectedCar();
-
-};
-
-class LateralControl : public QWidget {
-  Q_OBJECT
-public:
-  explicit LateralControl(QWidget* parent = 0);
-
-private:
-
-signals:
-  void backPress();
-  void selected();
-
-};
-
-class CommunityPanel : public QWidget {
-  Q_OBJECT
-
-private:
-  QStackedLayout* main_layout = nullptr;
-  QWidget* homeScreen = nullptr;
-  SelectCar* selectCar = nullptr;
-  LateralControl* lateralControl = nullptr;
-
-  QWidget* homeWidget;
-
-public:
-  explicit CommunityPanel(QWidget *parent = nullptr);
-};
-

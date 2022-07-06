@@ -144,7 +144,3 @@ class HardwareBase(ABC):
 
   def recover_internal_panda(self):
     pass
-
-  @abstractmethod
-  def get_ip_address(self):
-    pass

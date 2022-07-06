@@ -24,12 +24,6 @@
 #include "selfdrive/ui/qt/util.h"
 #include "selfdrive/ui/qt/qt_window.h"
 
-#include <QComboBox>
-#include <QAbstractItemView>
-#include <QScroller>
-#include <QListView>
-#include <QListWidget>
-
 TogglesPanel::TogglesPanel(SettingsWindow *parent) : ListWidget(parent) {
   // param, title, desc, icon
   std::vector<std::tuple<QString, QString, QString, QString>> toggles{
@@ -62,12 +56,6 @@ TogglesPanel::TogglesPanel(SettingsWindow *parent) : ListWidget(parent) {
       tr("Record and Upload Driver Camera"),
       tr("Upload data from the driver facing camera and help improve the driver monitoring algorithm."),
       "../assets/offroad/icon_monitoring.png",
-    },
-    {
-      "EndToEndToggle",
-      tr("\U0001f96c Disable use of lanelines \U0001f96c"),
-      tr("In this mode openpilot will ignore lanelines and just drive how it thinks a human would."),
-      "../assets/offroad/icon_road.png",
     },
     {
       "DisengageOnAccelerator",
@@ -110,37 +98,6 @@ DevicePanel::DevicePanel(SettingsWindow *parent) : ListWidget(parent) {
   addItem(new LabelControl(tr("Dongle ID"), getDongleId().value_or(tr("N/A"))));
   addItem(new LabelControl(tr("Serial"), params.get("HardwareSerial").c_str()));
 
-  QHBoxLayout *reset_layout = new QHBoxLayout();
-  reset_layout->setSpacing(30);
-
-  // reset calibration button
-  QPushButton *restart_openpilot_btn = new QPushButton(tr("Soft restart"));
-  restart_openpilot_btn->setStyleSheet("height: 120px;border-radius: 15px;background-color: #393939;");
-  reset_layout->addWidget(restart_openpilot_btn);
-  QObject::connect(restart_openpilot_btn, &QPushButton::released, [=]() {
-    emit closeSettings();
-    QTimer::singleShot(1000, []() {
-      Params().putBool("SoftRestartTriggered", true);
-    });
-  });
-
-  // reset calibration button
-  QPushButton *reset_calib_btn = new QPushButton(tr("Reset Calibration"));
-  reset_calib_btn->setStyleSheet("height: 120px;border-radius: 15px;background-color: #393939;");
-  reset_layout->addWidget(reset_calib_btn);
-  QObject::connect(reset_calib_btn, &QPushButton::released, [=]() {
-    if (ConfirmationDialog::confirm(tr("Are you sure you want to reset calibration and live params?"), this)) {
-      Params().remove("CalibrationParams");
-      Params().remove("LiveParameters");
-      emit closeSettings();
-      QTimer::singleShot(1000, []() {
-        Params().putBool("SoftRestartTriggered", true);
-      });
-    }
-  });
-
-  addItem(reset_layout);
-
   // offroad-only buttons
 
   auto dcamBtn = new ButtonControl(tr("Driver Camera"), tr("PREVIEW"),
@@ -148,7 +105,7 @@ DevicePanel::DevicePanel(SettingsWindow *parent) : ListWidget(parent) {
   connect(dcamBtn, &ButtonControl::clicked, [=]() { emit showDriverView(); });
   addItem(dcamBtn);
 
-  auto resetCalibBtn = new ButtonControl(tr("Reset Calibration"), tr("RESET"), " ");
+  auto resetCalibBtn = new ButtonControl(tr("Reset Calibration"), tr("RESET"), "");
   connect(resetCalibBtn, &ButtonControl::showDescription, this, &DevicePanel::updateCalibDescription);
   connect(resetCalibBtn, &ButtonControl::clicked, [&]() {
     if (ConfirmationDialog::confirm(tr("Are you sure you want to reset calibration?"), this)) {
@@ -176,11 +133,11 @@ DevicePanel::DevicePanel(SettingsWindow *parent) : ListWidget(parent) {
     addItem(regulatoryBtn);
   }
 
-  /*QObject::connect(uiState(), &UIState::offroadTransition, [=](bool offroad) {
+  QObject::connect(uiState(), &UIState::offroadTransition, [=](bool offroad) {
     for (auto btn : findChildren<ButtonControl *>()) {
       btn->setEnabled(offroad);
     }
-  });*/
+  });
 
   // power buttons
   QHBoxLayout *power_layout = new QHBoxLayout();
@@ -190,23 +147,6 @@ DevicePanel::DevicePanel(SettingsWindow *parent) : ListWidget(parent) {
   reboot_btn->setObjectName("reboot_btn");
   power_layout->addWidget(reboot_btn);
   QObject::connect(reboot_btn, &QPushButton::clicked, this, &DevicePanel::reboot);
-
-  QPushButton *rebuild_btn = new QPushButton(tr("Rebuild"));
-  rebuild_btn->setObjectName("rebuild_btn");
-  power_layout->addWidget(rebuild_btn);
-  QObject::connect(rebuild_btn, &QPushButton::clicked, [=]() {
-
-    if (ConfirmationDialog::confirm(tr("Are you sure you want to rebuild?"), this)) {
-      std::system("cd /data/openpilot && scons -c");
-      std::system("rm /data/openpilot/.sconsign.dblite");
-      std::system("rm /data/openpilot/prebuilt");
-      std::system("rm -rf /tmp/scons_cache");
-      if (Hardware::TICI())
-        std::system("sudo reboot");
-      else
-        std::system("reboot");
-    }
-  });
 
   QPushButton *poweroff_btn = new QPushButton(tr("Power Off"));
   poweroff_btn->setObjectName("poweroff_btn");
@@ -220,8 +160,6 @@ DevicePanel::DevicePanel(SettingsWindow *parent) : ListWidget(parent) {
   setStyleSheet(R"(
     #reboot_btn { height: 120px; border-radius: 15px; background-color: #393939; }
     #reboot_btn:pressed { background-color: #4a4a4a; }
-    #rebuild_btn { height: 120px; border-radius: 15px; background-color: #393939; }
-    #rebuild_btn:pressed { background-color: #4a4a4a; }
     #poweroff_btn { height: 120px; border-radius: 15px; background-color: #E22C2C; }
     #poweroff_btn:pressed { background-color: #FF2424; }
   )");
@@ -341,30 +279,6 @@ void SoftwarePanel::updateLabels() {
   osVersionLbl->setText(QString::fromStdString(Hardware::get_os_version()).trimmed());
 }
 
-QWidget *network_panel(QWidget *parent) {
-  return new Networking(parent);
-}
-
-static QStringList get_list(const char* path)
-{
-  QStringList stringList;
-  QFile textFile(path);
-  if(textFile.open(QIODevice::ReadOnly))
-  {
-      QTextStream textStream(&textFile);
-      while (true)
-      {
-        QString line = textStream.readLine();
-        if (line.isNull())
-            break;
-        else
-            stringList.append(line);
-      }
-  }
-
-  return stringList;
-}
-
 void SettingsWindow::showEvent(QShowEvent *event) {
   panel_widget->setCurrentIndex(0);
   nav_btns->buttons()[0]->setChecked(true);
@@ -383,40 +297,36 @@ SettingsWindow::SettingsWindow(QWidget *parent) : QFrame(parent) {
   )");
 
   // close button
-  QPushButton *close_btn = new QPushButton(tr("← Back"));
+  QPushButton *close_btn = new QPushButton(tr("×"));
   close_btn->setStyleSheet(R"(
     QPushButton {
-      font-size: 50px;
+      font-size: 140px;
+      padding-bottom: 20px;
       font-weight: bold;
-      margin: 0px;
-      padding: 15px;
-      border-width: 0;
-      border-radius: 30px;
-      color: #dddddd;
-      background-color: #444444;
+      border 1px grey solid;
+      border-radius: 100px;
+      background-color: #292929;
+      font-weight: 400;
     }
     QPushButton:pressed {
       background-color: #3B3B3B;
     }
   )");
-  close_btn->setFixedSize(300, 110);
-  sidebar_layout->addSpacing(10);
-  sidebar_layout->addWidget(close_btn, 0, Qt::AlignRight);
-  sidebar_layout->addSpacing(10);
+  close_btn->setFixedSize(200, 200);
+  sidebar_layout->addSpacing(45);
+  sidebar_layout->addWidget(close_btn, 0, Qt::AlignCenter);
   QObject::connect(close_btn, &QPushButton::clicked, this, &SettingsWindow::closeSettings);
 
   // setup panels
   DevicePanel *device = new DevicePanel(this);
   QObject::connect(device, &DevicePanel::reviewTrainingGuide, this, &SettingsWindow::reviewTrainingGuide);
   QObject::connect(device, &DevicePanel::showDriverView, this, &SettingsWindow::showDriverView);
-  QObject::connect(device, &DevicePanel::closeSettings, this, &SettingsWindow::closeSettings);
 
   QList<QPair<QString, QWidget *>> panels = {
     {tr("Device"), device},
-    {tr("Network"), network_panel(this)},
+    {tr("Network"), new Networking(this)},
     {tr("Toggles"), new TogglesPanel(this)},
     {tr("Software"), new SoftwarePanel(this)},
-    {tr("Community"), new CommunityPanel(this)},
   };
 
 #ifdef ENABLE_MAPS
@@ -437,7 +347,7 @@ SettingsWindow::SettingsWindow(QWidget *parent) : QFrame(parent) {
         color: grey;
         border: none;
         background: none;
-        font-size: 60px;
+        font-size: 65px;
         font-weight: 500;
         padding-top: %1px;
         padding-bottom: %1px;
@@ -482,287 +392,4 @@ SettingsWindow::SettingsWindow(QWidget *parent) : QFrame(parent) {
       background-color: black;
     }
   )");
-}
-
-
-
-/////////////////////////////////////////////////////////////////////////
-
-CommunityPanel::CommunityPanel(QWidget* parent) : QWidget(parent) {
-
-  main_layout = new QStackedLayout(this);
-
-  homeScreen = new QWidget(this);
-  QVBoxLayout* vlayout = new QVBoxLayout(homeScreen);
-  vlayout->setContentsMargins(0, 20, 0, 20);
-
-  QString selected = QString::fromStdString(Params().get("SelectedCar"));
-
-  QPushButton* selectCarBtn = new QPushButton(selected.length() ? selected : tr("Select your car"));
-  selectCarBtn->setObjectName("selectCarBtn");
-  //selectCarBtn->setStyleSheet("margin-right: 30px;");
-  //selectCarBtn->setFixedSize(350, 100);
-  connect(selectCarBtn, &QPushButton::clicked, [=]() { main_layout->setCurrentWidget(selectCar); });
-
-  homeWidget = new QWidget(this);
-  QVBoxLayout* toggleLayout = new QVBoxLayout(homeWidget);
-  homeWidget->setObjectName("homeWidget");
-
-  ScrollView *scroller = new ScrollView(homeWidget, this);
-  scroller->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
-
-  main_layout->addWidget(homeScreen);
-
-  selectCar = new SelectCar(this);
-  connect(selectCar, &SelectCar::backPress, [=]() { main_layout->setCurrentWidget(homeScreen); });
-  connect(selectCar, &SelectCar::selectedCar, [=]() {
-
-     QString selected = QString::fromStdString(Params().get("SelectedCar"));
-     selectCarBtn->setText(selected.length() ? selected : tr("Select your car"));
-     main_layout->setCurrentWidget(homeScreen);
-  });
-  main_layout->addWidget(selectCar);
-
-
-  QString lateral_control = QString::fromStdString(Params().get("LateralControl"));
-  if(lateral_control.length() == 0)
-    lateral_control = "TORQUE";
-
-  QPushButton* lateralControlBtn = new QPushButton(lateral_control);
-  lateralControlBtn->setObjectName("lateralControlBtn");
-  //lateralControlBtn->setStyleSheet("margin-right: 30px;");
-  //lateralControlBtn->setFixedSize(350, 100);
-  connect(lateralControlBtn, &QPushButton::clicked, [=]() { main_layout->setCurrentWidget(lateralControl); });
-
-
-  lateralControl = new LateralControl(this);
-  connect(lateralControl, &LateralControl::backPress, [=]() { main_layout->setCurrentWidget(homeScreen); });
-  connect(lateralControl, &LateralControl::selected, [=]() {
-
-     QString lateral_control = QString::fromStdString(Params().get("LateralControl"));
-     if(lateral_control.length() == 0)
-       lateral_control = "TORQUE";
-     lateralControlBtn->setText(lateral_control);
-     main_layout->setCurrentWidget(homeScreen);
-  });
-  main_layout->addWidget(lateralControl);
-
-  QHBoxLayout* layoutBtn = new QHBoxLayout(homeWidget);
-
-  layoutBtn->addWidget(lateralControlBtn);
-  layoutBtn->addSpacing(10);
-  layoutBtn->addWidget(selectCarBtn);
-
-  vlayout->addSpacing(10);
-  vlayout->addLayout(layoutBtn, 0);
-  vlayout->addSpacing(10);
-  vlayout->addWidget(scroller, 1);
-
-  QPalette pal = palette();
-  pal.setColor(QPalette::Background, QColor(0x29, 0x29, 0x29));
-  setAutoFillBackground(true);
-  setPalette(pal);
-
-  setStyleSheet(R"(
-    #back_btn, #selectCarBtn, #lateralControlBtn {
-      font-size: 50px;
-      margin: 0px;
-      padding: 20px;
-      border-width: 0;
-      border-radius: 30px;
-      color: #dddddd;
-      background-color: #444444;
-    }
-  )");
-
-  QList<ParamControl*> toggles;
-
-  toggles.append(new ParamControl(tr("UseClusterSpeed"),
-                                            tr("Use Cluster Speed"),
-                                            tr("Use cluster speed instead of wheel speed."),
-                                            "../assets/offroad/icon_road.png",
-                                            this));
-
-  toggles.append(new ParamControl("LongControlEnabled",
-                                            tr("Enable HKG Long Control"),
-                                            tr("warnings: it is beta, be careful!! Openpilot will control the speed of your car"),
-                                            "../assets/offroad/icon_road.png",
-                                            this));
-
-  toggles.append(new ParamControl("IsLdwsCar",
-                                            tr("LDWS"),
-                                            tr("If your car only supports LDWS, turn it on."),
-                                            "../assets/offroad/icon_openpilot.png",
-                                            this));
-
-  toggles.append(new ParamControl("LaneChangeEnabled",
-                                            tr("Enable Lane Change Assist"),
-                                            tr("Perform assisted lane changes with openpilot by checking your surroundings for safety, activating the turn signal and gently nudging the steering wheel towards your desired lane. openpilot is not capable of checking if a lane change is safe. You must continuously observe your surroundings to use this feature."),
-                                            "../assets/offroad/icon_road.png",
-                                            this));
-
-  toggles.append(new ParamControl("AutoLaneChangeEnabled",
-                                            tr("Enable Auto Lane Change(Nudgeless)"),
-                                            tr("warnings: it is beta, be careful!!"),
-                                            "../assets/offroad/icon_road.png",
-                                            this));
-
-  toggles.append(new ParamControl("SccSmootherSlowOnCurves",
-                                            tr("Enable Slow On Curves"),
-                                            "",
-                                            "../assets/offroad/icon_road.png",
-                                            this));
-
-  toggles.append(new ParamControl("SccSmootherSyncGasPressed",
-                                            tr("Sync set speed on gas pressed"),
-                                            "",
-                                            "../assets/offroad/icon_road.png",
-                                            this));
-
-  toggles.append(new ParamControl("StockNaviDecelEnabled",
-                                            tr("Stock Navi based deceleration"),
-                                            tr("Use the stock navi based deceleration for longcontrol"),
-                                            "../assets/offroad/icon_road.png",
-                                            this));
-
-  toggles.append(new ParamControl("KeepSteeringTurnSignals",
-                                            tr("Keep steering while turn signals"),
-                                            "",
-                                            "../assets/offroad/icon_openpilot.png",
-                                            this));
-  toggles.append(new ParamControl("HapticFeedbackWhenSpeedCamera",
-                                            tr("Haptic feedback (speed-cam alert)"),
-                                            tr("Haptic feedback when a speed camera is detected"),
-                                            "../assets/offroad/icon_openpilot.png",
-                                            this));
-
-  /*toggles.append(new ParamControl("NewRadarInterface",
-                                            tr("Use new radar interface"),
-                                            "",
-                                            "../assets/offroad/icon_road.png",
-                                            this));*/
-
-  toggles.append(new ParamControl("DisableOpFcw",
-                                            tr("Disable Openpilot FCW"),
-                                            "",
-                                            "../assets/offroad/icon_shell.png",
-                                            this));
-
-  toggles.append(new ParamControl("ShowDebugUI",
-                                            tr("Show Debug UI"),
-                                            "",
-                                            "../assets/offroad/icon_shell.png",
-                                            this));
-
-  /*toggles.append(new ParamControl("CustomLeadMark",
-                                            tr("Use custom lead mark"),
-                                            "",
-                                            "../assets/offroad/icon_road.png",
-                                            this));*/
-
-  for(ParamControl *toggle : toggles) {
-    if(main_layout->count() != 0) {
-      toggleLayout->addWidget(horizontal_line());
-    }
-    toggleLayout->addWidget(toggle);
-  }
-}
-
-SelectCar::SelectCar(QWidget* parent): QWidget(parent) {
-
-  QVBoxLayout* main_layout = new QVBoxLayout(this);
-  main_layout->setMargin(20);
-  main_layout->setSpacing(20);
-
-  // Back button
-  QPushButton* back = new QPushButton("Back");
-  back->setObjectName("back_btn");
-  back->setFixedSize(500, 100);
-  connect(back, &QPushButton::clicked, [=]() { emit backPress(); });
-  main_layout->addWidget(back, 0, Qt::AlignLeft);
-
-  QListWidget* list = new QListWidget(this);
-  list->setStyleSheet("QListView {padding: 40px; background-color: #393939; border-radius: 15px; height: 140px;} QListView::item{height: 100px}");
-  //list->setAttribute(Qt::WA_AcceptTouchEvents, true);
-  QScroller::grabGesture(list->viewport(), QScroller::LeftMouseButtonGesture);
-  list->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
-
-  list->addItem("[ Not selected ]");
-
-  QStringList items = get_list("/data/params/d/SupportedCars");
-  list->addItems(items);
-  list->setCurrentRow(0);
-
-  QString selected = QString::fromStdString(Params().get("SelectedCar"));
-
-  int index = 0;
-  for(QString item : items) {
-    if(selected == item) {
-        list->setCurrentRow(index + 1);
-        break;
-    }
-    index++;
-  }
-
-  QObject::connect(list, QOverload<QListWidgetItem*>::of(&QListWidget::itemClicked),
-    [=](QListWidgetItem* item){
-
-    if(list->currentRow() == 0)
-        Params().remove("SelectedCar");
-    else
-        Params().put("SelectedCar", list->currentItem()->text().toStdString());
-
-    emit selectedCar();
-    });
-
-  main_layout->addWidget(list);
-}
-
-LateralControl::LateralControl(QWidget* parent): QWidget(parent) {
-
-  QVBoxLayout* main_layout = new QVBoxLayout(this);
-  main_layout->setMargin(20);
-  main_layout->setSpacing(20);
-
-  // Back button
-  QPushButton* back = new QPushButton("Back");
-  back->setObjectName("back_btn");
-  back->setFixedSize(500, 100);
-  connect(back, &QPushButton::clicked, [=]() { emit backPress(); });
-  main_layout->addWidget(back, 0, Qt::AlignLeft);
-
-  QListWidget* list = new QListWidget(this);
-  list->setStyleSheet("QListView {padding: 40px; background-color: #393939; border-radius: 15px; height: 140px;} QListView::item{height: 100px}");
-  //list->setAttribute(Qt::WA_AcceptTouchEvents, true);
-  QScroller::grabGesture(list->viewport(), QScroller::LeftMouseButtonGesture);
-  list->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
-
-  QStringList items = {"TORQUE", "LQR", "INDI"};
-  list->addItems(items);
-  list->setCurrentRow(0);
-
-  QString selectedControl = QString::fromStdString(Params().get("LateralControl"));
-
-  int index = 0;
-  for(QString item : items) {
-    if(selectedControl == item) {
-        list->setCurrentRow(index);
-        break;
-    }
-    index++;
-  }
-
-  QObject::connect(list, QOverload<QListWidgetItem*>::of(&QListWidget::itemClicked),
-    [=](QListWidgetItem* item){
-
-    Params().put("LateralControl", list->currentItem()->text().toStdString());
-    emit selected();
-
-    QTimer::singleShot(1000, []() {
-        Params().putBool("SoftRestartTriggered", true);
-      });
-
-    });
-
-  main_layout->addWidget(list);
 }

@@ -5,7 +5,6 @@ import signal
 import subprocess
 import sys
 import traceback
-from multiprocessing import Process
 from typing import List, Tuple, Union
 
 import cereal.messaging as messaging
@@ -16,12 +15,13 @@ from common.text_window import TextWindow
 from selfdrive.boardd.set_time import set_time
 from system.hardware import HARDWARE, PC
 from selfdrive.manager.helpers import unblock_stdout
-from selfdrive.manager.process import ensure_running, launcher
+from selfdrive.manager.process import ensure_running
 from selfdrive.manager.process_config import managed_processes
 from selfdrive.athena.registration import register, UNREGISTERED_DONGLE_ID
 from system.swaglog import cloudlog, add_file_handler
 from system.version import is_dirty, get_commit, get_version, get_origin, get_short_branch, \
                               terms_version, training_version
+
 
 sys.path.append(os.path.join(BASEDIR, "pyextra"))
 
@@ -31,34 +31,16 @@ def manager_init() -> None:
   set_time(cloudlog)
 
   # save boot log
-  #subprocess.call("./bootlog", cwd=os.path.join(BASEDIR, "selfdrive/loggerd"))
+  subprocess.call("./bootlog", cwd=os.path.join(BASEDIR, "selfdrive/loggerd"))
 
   params = Params()
   params.clear_all(ParamKeyType.CLEAR_ON_MANAGER_START)
 
   default_params: List[Tuple[str, Union[str, bytes]]] = [
     ("CompletedTrainingVersion", "0"),
-    ("DisengageOnAccelerator", "0"),
+    ("DisengageOnAccelerator", "1"),
     ("HasAcceptedTerms", "0"),
     ("OpenpilotEnabledToggle", "1"),
-    ("IsMetric", "1"),
-
-    # HKG
-    ("LateralControl", "TORQUE"),
-    ("UseClusterSpeed", "0"),
-    ("LongControlEnabled", "0"),
-    ("IsLdwsCar", "0"),
-    ("LaneChangeEnabled", "0"),
-    ("AutoLaneChangeEnabled", "0"),
-
-    ("SccSmootherSlowOnCurves", "0"),
-    ("SccSmootherSyncGasPressed", "0"),
-    ("StockNaviDecelEnabled", "0"),
-    ("KeepSteeringTurnSignals", "0"),
-    ("HapticFeedbackWhenSpeedCamera", "0"),
-    ("DisableOpFcw", "0"),
-    ("ShowDebugUI", "0"),
-    ("NewRadarInterface", "0"),
   ]
   if not PC:
     default_params.append(("LastUpdateTime", datetime.datetime.utcnow().isoformat().encode('utf8')))
@@ -133,8 +115,6 @@ def manager_cleanup() -> None:
 
 
 def manager_thread() -> None:
-
-  Process(name="road_speed_limiter", target=launcher, args=("selfdrive.road_speed_limiter", "road_speed_limiter")).start()
   cloudlog.bind(daemon="manager")
   cloudlog.info("manager start")
   cloudlog.info({"environ": os.environ})

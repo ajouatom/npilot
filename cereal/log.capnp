@@ -330,8 +330,6 @@ struct DeviceState @0xa4d8b5af2aa492eb {
   fanSpeedPercentDesired @10 :UInt16;
   screenBrightnessPercent @37 :Int8;
 
-  wifiIpAddress @43 :Text;
-  
   struct ThermalZone {
     name @0 :Text;
     temp @1 :Float32;
@@ -596,22 +594,6 @@ struct ControlsState @0x97ff69c53601abf1 {
     debugState @59 :LateralDebugState;
     torqueState @60 :LateralTorqueState;
   }
-
-  angleSteers @63 :Float32;
-  applyAccel @64 :Float32;
-  aReqValue @65 :Float32;
-  aReqValueMin @66 :Float32;
-  aReqValueMax @67 :Float32;
-
-  steerRatio @68 :Float32;
-  steerActuatorDelay @69 :Float32;
-  sccGasFactor @70 :Float32;
-  sccBrakeFactor @71 :Float32;
-  sccCurvatureFactor @72 :Float32;
-
-  sccStockCamAct @73 :Float32;
-  sccStockCamStatus @74 :Float32;
-
 
   enum OpenpilotState @0xdbe58b96d2d1ac61 {
     disabled @0;
@@ -945,9 +927,6 @@ struct LateralPlan @0xe1e9318e2ae8b51e {
   curvatureRates @28 :List(Float32);
 
   solverExecutionTime @30 :Float32;
-  
-  autoLaneChangeEnabled @32 :Bool;
-  autoLaneChangeTimer @33 :Int8;
 
   enum Desire {
     none @0;
@@ -1881,26 +1860,6 @@ struct EncodeData {
   unixTimestampNanos @3 :UInt64;
 }
 
-struct RoadLimitSpeed {
-    active @0 :Int16;
-    roadLimitSpeed @1 :Int16;
-    isHighway @2 :Bool;
-    camType @3 :Int16;
-    camLimitSpeedLeftDist @4 :Int16;
-    camLimitSpeed @5 :Int16;
-    sectionLimitSpeed @6 :Int16;
-    sectionLeftDist @7 :Int16;
-    camSpeedFactor @8 :Float32;
-    restArea @9 :List(RestArea);
-
-    struct RestArea {
-      image @0 :Text;
-      title @1 :Text;
-      oilPrice @2 :Text;
-      distance @3 :Text;
-    }
-}
-
 struct Event {
   logMonoTime @0 :UInt64;  # nanoseconds
   valid @67 :Bool = true;
@@ -1966,9 +1925,6 @@ struct Event {
     navInstruction @82 :NavInstruction;
     navRoute @83 :NavRoute;
     navThumbnail @84: Thumbnail;
-    
-    # neokii
-    roadLimitSpeed @93 :RoadLimitSpeed;
 
     # *********** debug ***********
     testJoystick @52 :Joystick;
