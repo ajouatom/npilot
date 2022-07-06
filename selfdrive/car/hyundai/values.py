@@ -641,15 +641,19 @@ FW_VERSIONS = {
     ],
     (Ecu.eps, 0x7d4, None): [
       b'\xf1\x00TM  MDPS C 1.00 1.02 56310-CLAC0 4TSHC102',
+      b'\xf1\x8757700-CL000\xf1\x00TM  MDPS R 1.00 1.05 57700-CL000 4TSHP105',
     ],
     (Ecu.fwdCamera, 0x7c4, None): [
       b'\xf1\x00TMH MFC  AT USA LHD 1.00 1.03 99211-S1500 210224',
+      b'\xf1\x00TMH MFC  AT KOR LHD 1.00 1.05 99211-S1500 220126',
     ],
     (Ecu.transmission, 0x7e1, None): [
       b'\xf1\x87959102T250\x00\x00\x00\x00\x00\xf1\x81E14\x00\x00\x00\x00\x00\x00\x00\xf1\x00PSBG2333  E14\x00\x00\x00\x00\x00\x00\x00TTM2H16SA2\x80\xd7l\xb2',
+      b'\xf1\x8795441-3D100\x00\xf1\x81E16\x00\x00\x00\x00\x00\x00\x00\xf1\x00PSBG2333  E16\x00\x00\x00\x00\x00\x00\x00TTM2H16KA1\xc6\x15Q\x1e',
     ],
     (Ecu.engine, 0x7e0, None): [
       b'\xf1\x87391312MTC1',
+      b'\xf1\x87391312MTB0',
     ],
   },
   CAR.SANTA_FE_PHEV_2022: {
