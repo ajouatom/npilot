@@ -35,6 +35,7 @@ common/filter_simple.py
 common/stat_live.py
 common/spinner.py
 common/text_window.py
+common/SConscript
 
 common/kalman/.gitignore
 common/kalman/*
@@ -169,6 +170,7 @@ selfdrive/controls/lib/events.py
 selfdrive/controls/lib/lane_planner.py
 selfdrive/controls/lib/latcontrol_angle.py
 selfdrive/controls/lib/latcontrol_indi.py
+selfdrive/controls/lib/latcontrol_lqr.py
 selfdrive/controls/lib/latcontrol_torque.py
 selfdrive/controls/lib/latcontrol_pid.py
 selfdrive/controls/lib/latcontrol.py
@@ -217,6 +219,7 @@ selfdrive/locationd/generated/gps.h
 
 selfdrive/locationd/laikad.py
 selfdrive/locationd/laikad_helpers.py
+selfdrive/locationd/locationd.cc
 selfdrive/locationd/locationd.h
 selfdrive/locationd/locationd.cc
 selfdrive/locationd/paramsd.py
