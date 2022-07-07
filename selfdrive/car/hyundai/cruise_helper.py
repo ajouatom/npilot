@@ -55,8 +55,8 @@ class CruiseHelper:
   def update_params(self, frame, all):
     if all or frame % 100 == 0:
       self.autoCurveSpeedCtrl = Params().get_bool("AutoCurveSpeedCtrl")
-      self.naviDecelMarginDist = float(int(Params().get("NaviDecelMarginDist", encoding="utf8")))
-      self.naviDecelRate = float(int(Params().get("NaviDecelRate", encoding="utf8")))
+      #self.naviDecelMarginDist = float(int(Params().get("NaviDecelMarginDist", encoding="utf8")))
+      #self.naviDecelRate = float(int(Params().get("NaviDecelRate", encoding="utf8")))
     if all or (frame + 30) % 100 == 0:
       self.autoResumeFromGasSpeed = float(int(Params().get("AutoResumeFromGasSpeed", encoding="utf8")))
       self.autoResumeFromGas = Params().get_bool("AutoResumeFromGas")
@@ -142,8 +142,8 @@ class CruiseHelper:
 
         self.position_x = x[TRAJECTORY_SIZE-1]
         self.position_y = y[TRAJECTORY_SIZE-1]
-        str_log1 = 'CURVE={:5.1f},MODEL={:5.1f},POS={:5.1f},{:5.1f}'.format( curve_speed_ms*CV.MS_TO_KPH, model_speed*CV.MS_TO_KPH, x[TRAJECTORY_SIZE-1], y[TRAJECTORY_SIZE-1])
-        trace1.printf2( '{}'.format( str_log1 ) )
+        #str_log1 = 'CURVE={:5.1f},MODEL={:5.1f},POS={:5.1f},{:5.1f}'.format( curve_speed_ms*CV.MS_TO_KPH, model_speed*CV.MS_TO_KPH, x[TRAJECTORY_SIZE-1], y[TRAJECTORY_SIZE-1])
+        #trace1.printf2( '{}'.format( str_log1 ) )
       else:
         #curve_speed_ms = 255.
         self.position_x = 1000.0
@@ -177,60 +177,9 @@ class CruiseHelper:
     v_cruise_kph_last = controls.v_cruise_kph
     vEgo_cruise_kph = int(clip(CS.vEgo * CV.MS_TO_KPH+0.5, 20, 161))
     
-    mapValid_last = self.mapValid
-
-    # target속도가 현재설정속도보다 낮으면 바꿈.
-    #if self.v_cruise_kph_backup < controls.v_cruise_kph:
-    #  self.v_cruise_kph_backup = controls.v_cruise_kph
-      
-    #cruise_set_speed_kph = controls.v_cruise_kph      
     cruise_set_speed_kph = self.v_cruise_kph_current
     spdTarget = cruise_set_speed_kph #설정속도
     v_ego_kph = CS.vEgo * CV.MS_TO_KPH    #실제속도
-    speedLimit = controls.sm['liveNaviData'].speedLimit
-    speedLimitDistance = controls.sm['liveNaviData'].arrivalDistance  #speedLimitDistance
-    safetySign  = controls.sm['liveNaviData'].safetySign #124 과속방지턱,
-    self.mapValid = controls.sm['liveNaviData'].mapValid
-    trafficType = controls.sm['liveNaviData'].trafficType
-    turnInfo = controls.sm['liveNaviData'].turnInfo
-    distanceToTurn = controls.sm['liveNaviData'].distanceToTurn
-    #print("get_navi...{} {} {} {} {} {}".format(speedLimit, speedLimitDistance, mapValid, trafficType, turnInfo, distanceToTurn))
-    
-    #Navi신호가 없다가 생기면 현재속도 백업(맵종류별로 백업을...)
-    if not mapValid_last and self.mapValid:
-      self.v_cruise_kph_backup = self.v_cruise_kph_current
-    #Navi신호가 없어지면 이전속도로 복원
-    if mapValid_last and not self.mapValid:
-      self.v_cruise_kph_current = self.v_cruise_kph_backup
-
-    naviDecelMarginDist = interp(v_ego_kph, [30, 120], [50, self.naviDecelMarginDist])
-    #현재속도유지: navi신호가 없거나 trafficType 이 아무것도 없으면...
-    if not self.mapValid or trafficType == 0:      
-      spdTarget = cruise_set_speed_kph
-    #현재속도유지: 속도제한이 30이하이면
-    elif speedLimit < 30:
-      spdTarget = cruise_set_speed_kph
-    #elif safetySign == 124: #과속방지턱
-    #  spdTarget = interp(v_ego_kph , [40, 60, 80], [35, 50, 65])
-    elif speedLimitDistance < naviDecelMarginDist:
-      spdTarget = speedLimit
-    elif cruise_set_speed_kph <= speedLimit:
-      spdTarget = cruise_set_speed_kph
-    elif vEgo_cruise_kph <= speedLimit:
-      spdTarget = speedLimit
-    else:
-      distMargin = naviDecelMarginDist
-      acc = 100./self.naviDecelRate * 3600.  # meter/hour: 0~100이 20초 이정도로 감속..
-      dist = (vEgo_cruise_kph + speedLimit)/2. * (vEgo_cruise_kph - speedLimit) / acc * 1000. #현재속도대비 감속에 필요한거리 (M)
-      dist = max(dist, 1)
-      if speedLimitDistance < dist + distMargin:
-        spdTarget = speedLimit + (speedLimitDistance-distMargin)/dist * (vEgo_cruise_kph - speedLimit)
-      elif vEgo_cruise_kph < speedLimit:
-        spdTarget = speedLimit + 10
-      else:
-        spdTarget = cruise_set_speed_kph
-      if spdTarget < speedLimit:
-        spdTarget = speedLimit
 
     if self.autoCurveSpeedCtrl:
       curve_speed = self.cal_curve_speed(controls, CS.vEgo, controls.sm.frame, self.curve_speed_last)
@@ -411,8 +360,8 @@ class CruiseHelper:
     if self.v_cruise_kph_backup < self.v_cruise_kph_current:
       self.v_cruise_kph_backup = self.v_cruise_kph_current
 
-    str_log1 = 'gas{:5.1f},cruise:v:{},{},c:{},b:{}'.format(CS.gas, v_cruise_kph, controls.v_cruise_kph, self.v_cruise_kph_current, self.v_cruise_kph_backup)
-    trace1.printf3( '{}'.format( str_log1 ) )
+    #str_log1 = 'gas{:5.1f},cruise:v:{},{},c:{},b:{}'.format(CS.gas, v_cruise_kph, controls.v_cruise_kph, self.v_cruise_kph_current, self.v_cruise_kph_backup)
+    #trace1.printf3( '{}'.format( str_log1 ) )
 
     return v_cruise_kph
 
