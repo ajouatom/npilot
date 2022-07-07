@@ -31,7 +31,6 @@ from selfdrive.controls.lib.vehicle_model import VehicleModel
 from selfdrive.locationd.calibrationd import Calibration
 from system.hardware import HARDWARE
 from selfdrive.manager.process_config import managed_processes
-from selfdrive.car.hyundai.cruise_helper import CruiseHelper
 from selfdrive.ntune import ntune_common_get, ntune_common_enabled, ntune_scc_get
 
 SOFT_DISABLE_TIME = 3  # seconds
@@ -181,10 +180,6 @@ class Controls:
 
     self.left_lane_visible = False
     self.right_lane_visible = False
-    
-    #ajouatom
-    self.cruise_helper = CruiseHelper()
-
     # TODO: no longer necessary, aside from process replay
     self.sm['liveParameters'].valid = True
 
@@ -226,8 +221,7 @@ class Controls:
     # Disable on rising edge of accelerator or brake. Also disable on brake when speed > 0
     if (CS.gasPressed and not self.CS_prev.gasPressed and self.disengage_on_accelerator) or \
       (CS.brakePressed and (not self.CS_prev.brakePressed or not CS.standstill)):
-      #self.events.add(EventName.pedalPressed)
-      pass
+      self.events.add(EventName.pedalPressed)
 
     if CS.gasPressed:
       self.events.add(EventName.pedalPressedPreEnable if self.disengage_on_accelerator else
@@ -403,9 +397,9 @@ class Controls:
       v_future = speeds[-1]
     else:
       v_future = 100.0
-    #if CS.brakePressed and v_future >= self.CP.vEgoStarting \
-    #  and self.CP.openpilotLongitudinalControl and CS.vEgo < 0.3:
-    #  self.events.add(EventName.noTarget)
+    if CS.brakePressed and v_future >= self.CP.vEgoStarting \
+      and self.CP.openpilotLongitudinalControl and CS.vEgo < 0.3:
+      self.events.add(EventName.noTarget)
 
   def data_sample(self):
     """Receive data from sockets and update carState"""
@@ -458,11 +452,8 @@ class Controls:
 
     # if stock cruise is completely disabled, then we can use our own set speed logic
     if not self.CP.pcmCruise:
-      #self.v_cruise_kph = update_v_cruise(self.v_cruise_kph, CS.vEgo, CS.gasPressed, CS.buttonEvents,
-      #                                    self.button_timers, self.enabled, self.is_metric)
-      self.v_cruise_kph = self.cruise_helper.update_v_cruise2(self.v_cruise_kph, CS.buttonEvents, self.enabled, self.is_metric, self, CS)
-      self.cruise_helper.update_cruise_navi(self, CS)
-                                          
+      self.v_cruise_kph = update_v_cruise(self.v_cruise_kph, CS.vEgo, CS.gasPressed, CS.buttonEvents,
+                                          self.button_timers, self.enabled, self.is_metric)
     else:
       if CS.cruiseState.available:
         self.v_cruise_kph = CS.cruiseState.speed * CV.MS_TO_KPH
@@ -547,7 +538,6 @@ class Controls:
           self.current_alert_types.append(ET.ENABLE)
           if not self.CP.pcmCruise:
             self.v_cruise_kph = initialize_v_cruise(CS.vEgo, CS.buttonEvents, self.v_cruise_kph_last)
-          self.cruise_helper.cruiseSuspended = True
 
     # Check if openpilot is engaged and actuators are enabled
     self.enabled = self.state in ENABLED_STATES
@@ -578,15 +568,7 @@ class Controls:
     # Check which actuators can be enabled
     CC.latActive = self.active and not CS.steerFaultTemporary and not CS.steerFaultPermanent and \
                      CS.vEgo > self.CP.minSteerSpeed and not CS.standstill
-    ##CC.longActive = self.active and not self.events.any(ET.OVERRIDE) and self.CP.openpilotLongitudinalControl
-    cruiseSuspended = self.cruise_helper.cruiseSuspended
-    CC.longActive = self.active and not cruiseSuspended
-    CC.hudControl.cruiseSuspended = cruiseSuspended
-    radar = self.sm['radarState']
-    if radar.leadOne.status:
-      CC.hudControl.leadDistance = radar.leadOne.dRel
-    else:
-      CC.hudControl.leadDistance = 0
+    CC.longActive = self.active and not self.events.any(ET.OVERRIDE) and self.CP.openpilotLongitudinalControl
 
     actuators = CC.actuators
     actuators.longControlState = self.LoC.long_control_state
@@ -693,12 +675,6 @@ class Controls:
     hudControl.speedVisible = self.enabled
     hudControl.lanesVisible = self.enabled
     hudControl.leadVisible = self.sm['longitudinalPlan'].hasLead
-    speeds = self.sm['longitudinalPlan'].speeds
-    if len(speeds) > 1:
-      v_future = speeds[-1]
-    else:
-      v_future = 100.0
-    hudControl.vFuture = v_future
 
     right_lane_visible = self.sm['lateralPlan'].rProb > 0.5
     left_lane_visible = self.sm['lateralPlan'].lProb > 0.5
@@ -785,11 +761,7 @@ class Controls:
     controlsState.longControlState = self.LoC.long_control_state
     controlsState.vPid = float(self.LoC.v_pid)
     controlsState.vCruise = float(self.v_cruise_kph)
-
-    #ajouatom
-    controlsState.vCruiseTarget = float(self.cruise_helper.v_cruise_kph_backup)
-    controlsState.activateE2E = self.cruise_helper.activate_E2E
-
+    controlsState.activateE2E = False #self.cruise_helper.activate_E2E #ajouatom
     controlsState.upAccelCmd = float(self.LoC.pid.p)
     controlsState.uiAccelCmd = float(self.LoC.pid.i)
     controlsState.ufAccelCmd = float(self.LoC.pid.f)

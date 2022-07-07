@@ -247,7 +247,6 @@ struct CarState {
     speedOffset @3 :Float32;
     standstill @4 :Bool;
     nonAdaptive @5 :Bool;
-    cruiseGap @6 :Int32;
   }
 
   enum GearShifter {
@@ -384,9 +383,6 @@ struct CarControl {
     leftLaneVisible @7: Bool;
     rightLaneDepart @8: Bool;
     leftLaneDepart @9: Bool;
-    leadDistance @10: Float32;
-    cruiseSuspended @11: Bool;
-    vFuture @12: Float32;
 
     enum VisualAlert {
       # these are the choices from the Honda
