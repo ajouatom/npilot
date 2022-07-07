@@ -483,8 +483,8 @@ void NvgWindow::drawHud(QPainter &p, const cereal::ModelDataV2::Reader &model) {
   const auto car_params = sm["carParams"].getCarParams();
   const auto live_params = sm["liveParameters"].getLiveParameters();
 
-  int mdps_bus = car_params.getMdpsBus();
-  int scc_bus = car_params.getSccBus();
+  int mdps_bus = 0;// car_params.getMdpsBus();
+  int scc_bus = 0;// car_params.getSccBus();
 
   QString infoText;
   infoText.sprintf("%s AO(%.2f/%.2f) SR(%.2f) SAD(%.2f) BUS(MDPS %d, SCC %d) SCC(%.2f/%.2f/%.2f)",
@@ -531,7 +531,7 @@ void NvgWindow::drawBottomIcons(QPainter &p) {
   p.save();
   const SubMaster &sm = *(uiState()->sm);
   auto car_state = sm["carState"].getCarState();
-  auto scc_smoother = sm["carControl"].getCarControl().getSccSmoother();
+  //auto scc_smoother = sm["carControl"].getCarControl().getSccSmoother();
 
   // tire pressure
   {
@@ -570,8 +570,8 @@ void NvgWindow::drawBottomIcons(QPainter &p) {
 
   // cruise gap
   int gap = car_state.getCruiseGap();
-  bool longControl = scc_smoother.getLongControl();
-  int autoTrGap = scc_smoother.getAutoTrGap();
+  bool longControl = 0;// scc_smoother.getLongControl();
+  int autoTrGap = 0;// scc_smoother.getAutoTrGap();
 
   p.setPen(Qt::NoPen);
   p.setBrush(QBrush(QColor(0, 0, 0, 255 * .1f)));
@@ -665,15 +665,15 @@ void NvgWindow::drawMaxSpeed(QPainter &p) {
 
   UIState *s = uiState();
   const SubMaster &sm = *(s->sm);
-  const auto scc_smoother = sm["carControl"].getCarControl().getSccSmoother();
+  //const auto scc_smoother = sm["carControl"].getCarControl().getSccSmoother();
   const auto road_limit_speed = sm["roadLimitSpeed"].getRoadLimitSpeed();
 
   bool is_metric = s->scene.is_metric;
-  bool long_control = scc_smoother.getLongControl();
+  bool long_control = 0;// scc_smoother.getLongControl();
 
   // kph
-  float applyMaxSpeed = scc_smoother.getApplyMaxSpeed();
-  float cruiseMaxSpeed = scc_smoother.getCruiseMaxSpeed();
+  float applyMaxSpeed = 0;// scc_smoother.getApplyMaxSpeed();
+  float cruiseMaxSpeed = 0;// scc_smoother.getCruiseMaxSpeed();
 
   bool is_cruise_set = (cruiseMaxSpeed > 0 && cruiseMaxSpeed < 255);
 
