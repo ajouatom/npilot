@@ -937,6 +937,8 @@ EVENTS: Dict[int, Dict[str, Union[Alert, AlertCallbackType]]] = {
   EventName.lkasDisabled: {
     ET.PERMANENT: NormalPermanentAlert("LKAS Disabled: Enable LKAS to engage"),
     ET.NO_ENTRY: NoEntryAlert("LKAS Disabled"),
+  },
+
   EventName.cruisePaused: {
     ET.WARNING: EngagementAlert(AudibleAlert.prompt),
   },
