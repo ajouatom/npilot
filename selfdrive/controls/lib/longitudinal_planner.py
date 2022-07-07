@@ -58,7 +58,7 @@ class Planner:
     self.a_desired_trajectory = np.zeros(CONTROL_N)
     self.j_desired_trajectory = np.zeros(CONTROL_N)
     self.solverExecutionTime = 0.0
-	  self.activateE2E = False # ajouatom
+    self.activateE2E = False # ajouatom
 
   def update(self, sm):
     v_ego = sm['carState'].vEgo
