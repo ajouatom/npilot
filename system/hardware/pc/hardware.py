@@ -88,3 +88,6 @@ class Pc(HardwareBase):
 
   def get_networks(self):
     return None
+
+  def get_ip_address(self):
+    return ""

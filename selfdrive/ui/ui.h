@@ -16,7 +16,7 @@
 #include "common/params.h"
 #include "common/timing.h"
 
-const int bdr_s = 30;
+const int bdr_s = 20;
 const int header_h = 420;
 const int footer_h = 280;
 
@@ -99,9 +99,10 @@ typedef struct UIScene {
 
   // lead
   QPointF lead_vertices[2];
+  bool lead_radar[2] = {false, false};
 
   float light_sensor, accel_sensor, gyro_sensor;
-  bool started, ignition, is_metric, longitudinal_control;
+  bool started, ignition, is_metric, longitudinal_control, end_to_end;
   uint64_t started_frame;
 } UIScene;
 
@@ -130,6 +131,10 @@ public:
 
   QTransform car_space_transform;
   bool wide_camera;
+
+  bool recording = false;
+  bool show_debug = false;
+  std::string lat_control;
 
 signals:
   void uiUpdate(const UIState &s);

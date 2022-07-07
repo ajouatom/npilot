@@ -34,7 +34,7 @@ DISCONNECT_TIMEOUT = 5.  # wait 5 seconds before going offroad after disconnect 
 PANDA_STATES_TIMEOUT = int(1000 * 1.5 * DT_TRML)  # 1.5x the expected pandaState frequency
 
 ThermalBand = namedtuple("ThermalBand", ['min_temp', 'max_temp'])
-HardwareState = namedtuple("HardwareState", ['network_type', 'network_metered', 'network_strength', 'network_info', 'nvme_temps', 'modem_temps'])
+HardwareState = namedtuple("HardwareState", ['network_type', 'network_metered', 'network_strength', 'network_info', 'nvme_temps', 'modem_temps', 'wifi_address'])
 
 # List of thermal bands. We will stay within this region as long as we are within the bounds.
 # When exiting the bounds, we'll jump to the lower or higher band. Bands are ordered in the dict.
@@ -127,6 +127,7 @@ def hw_state_thread(end_event, hw_queue):
           network_info=HARDWARE.get_network_info(),
           nvme_temps=HARDWARE.get_nvme_temperatures(),
           modem_temps=modem_temps,
+          wifi_address=HARDWARE.get_ip_address(),
         )
 
         try:
@@ -182,6 +183,7 @@ def thermald_thread(end_event, hw_queue):
     network_info=None,
     nvme_temps=[],
     modem_temps=[],
+    wifi_address='N/A',
   )
 
   current_filter = FirstOrderFilter(0., CURRENT_TAU, DT_TRML)
@@ -198,6 +200,8 @@ def thermald_thread(end_event, hw_queue):
 
   fan_controller = None
 
+  restart_triggered_ts = 0.
+
   while not end_event.is_set():
     sm.update(PANDA_STATES_TIMEOUT)
 
@@ -205,6 +209,16 @@ def thermald_thread(end_event, hw_queue):
     peripheralState = sm['peripheralState']
 
     msg = read_thermal(thermal_config)
+
+    # neokii
+    if sec_since_boot() - restart_triggered_ts < 5.:
+      onroad_conditions["not_restart_triggered"] = False
+    else:
+      onroad_conditions["not_restart_triggered"] = True
+
+      if params.get_bool("SoftRestartTriggered"):
+        params.put_bool("SoftRestartTriggered", False)
+        restart_triggered_ts = sec_since_boot()
 
     if sm.updated['pandaStates'] and len(pandaStates) > 0:
 
@@ -243,6 +257,7 @@ def thermald_thread(end_event, hw_queue):
 
     msg.deviceState.nvmeTempC = last_hw_state.nvme_temps
     msg.deviceState.modemTempC = last_hw_state.modem_temps
+    msg.deviceState.wifiIpAddress = last_hw_state.wifi_address
 
     msg.deviceState.screenBrightnessPercent = HARDWARE.get_screen_brightness()
     msg.deviceState.usbOnline = HARDWARE.get_usb_present()
@@ -272,10 +287,10 @@ def thermald_thread(end_event, hw_queue):
 
     # Ensure date/time are valid
     now = datetime.datetime.utcnow()
-    startup_conditions["time_valid"] = (now.year > 2020) or (now.year == 2020 and now.month >= 10)
+    startup_conditions["time_valid"] = True #(now.year > 2020) or (now.year == 2020 and now.month >= 10)
     set_offroad_alert_if_changed("Offroad_InvalidTime", (not startup_conditions["time_valid"]))
 
-    startup_conditions["up_to_date"] = params.get("Offroad_ConnectivityNeeded") is None or params.get_bool("DisableUpdates") or params.get_bool("SnoozeUpdate")
+    startup_conditions["up_to_date"] = True #params.get("Offroad_ConnectivityNeeded") is None or params.get_bool("DisableUpdates") or params.get_bool("SnoozeUpdate")
     startup_conditions["not_uninstalling"] = not params.get_bool("DoUninstall")
     startup_conditions["accepted_terms"] = params.get("HasAcceptedTerms") == terms_version
 

@@ -50,7 +50,10 @@ static void update_leads(UIState *s, const cereal::RadarState::Reader &radar_sta
     if (lead_data.getStatus()) {
       float z = line.getZ()[get_path_length_idx(line, lead_data.getDRel())];
       calib_frame_to_full_frame(s, lead_data.getDRel(), -lead_data.getYRel(), z + 1.22, &s->scene.lead_vertices[i]);
+      s->scene.lead_radar[i] = lead_data.getRadar();
     }
+    else
+      s->scene.lead_radar[i] = false;
   }
 }
 
@@ -108,7 +111,7 @@ static void update_model(UIState *s, const cereal::ModelDataV2::Reader &model) {
     max_distance = std::clamp((float)(lead_d - fmin(lead_d * 0.35, 10.)), 0.0f, max_distance);
   }
   max_idx = get_path_length_idx(model_position, max_distance);
-  update_line_data(s, model_position, 0.9, 1.22, &scene.track_vertices, max_idx, false);
+  update_line_data(s, model_position, scene.end_to_end ? 0.9 : 0.5, 1.22, &scene.track_vertices, max_idx, false);
 }
 
 static void update_sockets(UIState *s) {
@@ -192,7 +195,10 @@ static void update_state(UIState *s) {
 }
 
 void ui_update_params(UIState *s) {
-  s->scene.is_metric = Params().getBool("IsMetric");
+  Params params;
+  s->scene.is_metric = params.getBool("IsMetric");
+  s->show_debug = params.getBool("ShowDebugUI");
+  s->lat_control = std::string(Params().get("LateralControl"));
 }
 
 void UIState::updateStatus() {
@@ -216,6 +222,7 @@ void UIState::updateStatus() {
     if (scene.started) {
       status = STATUS_DISENGAGED;
       scene.started_frame = sm->frame;
+      scene.end_to_end = Params().getBool("EndToEndToggle");
       wide_camera = Params().getBool("WideCameraOnly");
     }
     started_prev = scene.started;
@@ -226,8 +233,9 @@ void UIState::updateStatus() {
 UIState::UIState(QObject *parent) : QObject(parent) {
   sm = std::make_unique<SubMaster, const std::initializer_list<const char *>>({
     "modelV2", "controlsState", "liveCalibration", "radarState", "deviceState", "roadCameraState",
-    "pandaStates", "carParams", "driverMonitoringState", "sensorEvents", "carState", "liveLocationKalman",
+    "pandaStates", "carParams", "sensorEvents", "carState", "liveLocationKalman",
     "wideRoadCameraState", "managerState", "navInstruction", "navRoute",
+    "gpsLocationExternal", "carControl", "liveParameters", "roadLimitSpeed",
   });
 
   Params params;

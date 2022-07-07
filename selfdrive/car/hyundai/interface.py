@@ -50,6 +50,69 @@ class CarInterface(CarInterfaceBase):
     ret.stopAccel = 0.0
 
     ret.longitudinalActuatorDelayUpperBound = 1.0  # s
+    
+    ret.maxSteeringAngleDeg = 1000.
+
+    ret.steerFaultMaxAngle = 85
+    ret.steerFaultMaxFrames = 90
+
+    ret.disableLateralLiveTuning = False
+
+    # lateral
+    lateral_control = Params().get("LateralControl", encoding='utf-8')
+    if lateral_control == 'INDI':
+      ret.lateralTuning.init('indi')
+      ret.lateralTuning.indi.innerLoopGainBP = [0.]
+      ret.lateralTuning.indi.innerLoopGainV = [3.3]
+      ret.lateralTuning.indi.outerLoopGainBP = [0.]
+      ret.lateralTuning.indi.outerLoopGainV = [2.8]
+      ret.lateralTuning.indi.timeConstantBP = [0.]
+      ret.lateralTuning.indi.timeConstantV = [1.4]
+      ret.lateralTuning.indi.actuatorEffectivenessBP = [0.]
+      ret.lateralTuning.indi.actuatorEffectivenessV = [1.8]
+    elif lateral_control == 'LQR':
+      ret.lateralTuning.init('lqr')
+
+      ret.lateralTuning.lqr.scale = 1600.
+      ret.lateralTuning.lqr.ki = 0.01
+      ret.lateralTuning.lqr.dcGain = 0.0025
+
+      ret.lateralTuning.lqr.a = [0., 1., -0.22619643, 1.21822268]
+      ret.lateralTuning.lqr.b = [-1.92006585e-04, 3.95603032e-05]
+      ret.lateralTuning.lqr.c = [1., 0.]
+      ret.lateralTuning.lqr.k = [-110., 451.]
+      ret.lateralTuning.lqr.l = [0.33, 0.318]
+    else:
+      ret.lateralTuning.init('torque')
+      ret.lateralTuning.torque.useSteeringAngle = True
+      max_lat_accel = 2.5
+      ret.lateralTuning.torque.kp = 1.0 / max_lat_accel
+      ret.lateralTuning.torque.kf = 1.0 / max_lat_accel
+      ret.lateralTuning.torque.ki = 0.2 / max_lat_accel
+      ret.lateralTuning.torque.friction = 0.0
+
+      ret.lateralTuning.torque.kd = 1.0
+      ret.lateralTuning.torque.steeringAngleDeadzoneDeg = 0.0
+
+
+    ret.steerRatio = 16.5
+    ret.steerActuatorDelay = 0.2
+
+    ret.steerLimitTimer = 2.5
+
+    # longitudinal
+    ret.longitudinalTuning.kpBP = [0., 5.*CV.KPH_TO_MS, 10.*CV.KPH_TO_MS, 30.*CV.KPH_TO_MS, 130.*CV.KPH_TO_MS]
+    ret.longitudinalTuning.kpV = [1.2, 1.0, 0.93, 0.88, 0.5]
+    ret.longitudinalTuning.kiBP = [0., 130. * CV.KPH_TO_MS]
+    ret.longitudinalTuning.kiV = [0.1, 0.05]
+    ret.longitudinalActuatorDelayLowerBound = 0.3
+    ret.longitudinalActuatorDelayUpperBound = 0.3
+
+    ret.stopAccel = -2.0
+    ret.stoppingDecelRate = 0.4  # brake_travel/s while trying to stop
+    ret.vEgoStopping = 0.5
+    ret.vEgoStarting = 0.5
+    
     if candidate in (CAR.SANTA_FE, CAR.SANTA_FE_2022, CAR.SANTA_FE_HEV_2022, CAR.SANTA_FE_PHEV_2022):
       ret.lateralTuning.pid.kf = 0.00005
       ret.mass = 3982. * CV.LB_TO_KG + STD_CARGO_KG

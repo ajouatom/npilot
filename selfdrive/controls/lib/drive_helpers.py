@@ -5,6 +5,7 @@ from common.conversions import Conversions as CV
 from common.numpy_fast import clip, interp
 from common.realtime import DT_MDL
 from selfdrive.modeld.constants import T_IDXS
+from selfdrive.ntune import ntune_common_get
 
 # WARNING: this value was determined based on the model's training distribution,
 #          model predictions above this speed can be unpredictable
@@ -18,7 +19,7 @@ CONTROL_N = 17
 CAR_ROTATION_RADIUS = 0.0
 
 # EU guidelines
-MAX_LATERAL_JERK = 5.0
+MAX_LATERAL_JERK = 10.0 # npilot 5.0
 
 ButtonType = car.CarState.ButtonEvent.Type
 CRUISE_LONG_PRESS = 50
@@ -35,7 +36,7 @@ CRUISE_INTERVAL_SIGN = {
 class MPC_COST_LAT:
   PATH = 1.0
   HEADING = 1.0
-  STEER_RATE = 1.0
+  STEER_RATE = 0.4 #npilot 1.0
 
 
 def apply_deadzone(error, deadzone):
@@ -110,8 +111,7 @@ def get_lag_adjusted_curvature(CP, v_ego, psis, curvatures, curvature_rates):
   v_ego = max(v_ego, 0.1)
 
   # TODO this needs more thought, use .2s extra for now to estimate other delays
-  delay = CP.steerActuatorDelay + .2
-
+  delay = ntune_common_get('steerActuatorDelay') + .2
   # MPC can plan to turn the wheel and turn back before t_delay. This means
   # in high delay cases some corrections never even get commanded. So just use
   # psi to calculate a simple linearization of desired curvature

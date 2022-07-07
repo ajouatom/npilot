@@ -15,7 +15,7 @@ from common.text_window import TextWindow
 from selfdrive.boardd.set_time import set_time
 from system.hardware import HARDWARE, PC
 from selfdrive.manager.helpers import unblock_stdout
-from selfdrive.manager.process import ensure_running
+from selfdrive.manager.process import ensure_running, launcher
 from selfdrive.manager.process_config import managed_processes
 from selfdrive.athena.registration import register, UNREGISTERED_DONGLE_ID
 from system.swaglog import cloudlog, add_file_handler
@@ -41,6 +41,11 @@ def manager_init() -> None:
     ("DisengageOnAccelerator", "1"),
     ("HasAcceptedTerms", "0"),
     ("OpenpilotEnabledToggle", "1"),
+    ("IsMetric", "1"),
+
+    # HKG
+    ("LateralControl", "TORQUE"),
+    ("ShowDebugUI", "0"),
   ]
   if not PC:
     default_params.append(("LastUpdateTime", datetime.datetime.utcnow().isoformat().encode('utf8')))
@@ -115,6 +120,8 @@ def manager_cleanup() -> None:
 
 
 def manager_thread() -> None:
+
+  Process(name="road_speed_limiter", target=launcher, args=("selfdrive.road_speed_limiter", "road_speed_limiter")).start()
   cloudlog.bind(daemon="manager")
   cloudlog.info("manager start")
   cloudlog.info({"environ": os.environ})
