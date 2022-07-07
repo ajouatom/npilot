@@ -494,9 +494,9 @@ void NvgWindow::drawHud(QPainter &p, const cereal::ModelDataV2::Reader &model) {
                       controls_state.getSteerRatio(),
                       controls_state.getSteerActuatorDelay(),
                       mdps_bus, scc_bus,
-                      controls_state.getSccGasFactor(),
-                      controls_state.getSccBrakeFactor(),
-                      controls_state.getSccCurvatureFactor()
+                      0,//controls_state.getSccGasFactor(),
+                      0,//controls_state.getSccBrakeFactor(),
+                      0//controls_state.getSccCurvatureFactor()
                       );
 
   // info
