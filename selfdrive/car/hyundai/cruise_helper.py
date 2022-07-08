@@ -14,7 +14,7 @@ from selfdrive.controls.lib.longitudinal_mpc_lib.long_mpc import AUTO_TR_CRUISE_
 from selfdrive.ntune import ntune_scc_get
 from selfdrive.road_speed_limiter import road_speed_limiter_get_max_speed, road_speed_limiter_get_active, \
   get_road_speed_limiter
-import common.loger as trace1
+#import common.loger as trace1
 
 SYNC_MARGIN = 3.
 
