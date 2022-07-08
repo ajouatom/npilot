@@ -665,6 +665,8 @@ void NvgWindow::drawMaxSpeed(QPainter &p) {
 
   UIState *s = uiState();
   const SubMaster &sm = *(s->sm);
+  const auto cs = sm["controlsState"].getControlsState();
+  bool activateE2E = cs.getActivateE2E();
   //const auto scc_smoother = sm["carControl"].getCarControl().getSccSmoother();
   const auto road_limit_speed = sm["roadLimitSpeed"].getRoadLimitSpeed();
 
@@ -672,8 +674,8 @@ void NvgWindow::drawMaxSpeed(QPainter &p) {
   bool long_control = 0;// scc_smoother.getLongControl();
 
   // kph
-  float applyMaxSpeed = 0;// scc_smoother.getApplyMaxSpeed();
-  float cruiseMaxSpeed = 0;// scc_smoother.getCruiseMaxSpeed();
+  float applyMaxSpeed = cs.getVCruiseTarget();// scc_smoother.getApplyMaxSpeed();
+  float cruiseMaxSpeed = cs.getVCruise();// scc_smoother.getCruiseMaxSpeed();
 
   bool is_cruise_set = (cruiseMaxSpeed > 0 && cruiseMaxSpeed < 255);
 
@@ -784,6 +786,7 @@ void NvgWindow::drawMaxSpeed(QPainter &p) {
     else {
       str = long_control ? "OP" : "MAX";
     }
+    if (activateE2E) str = "E2E";
 
     QRect speed_rect = getRect(p, Qt::AlignCenter, str);
     QRect max_speed_rect(x_start, y_start + max_speed_height/2, board_width, max_speed_height/2);
