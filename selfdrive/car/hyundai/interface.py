@@ -396,10 +396,22 @@ class CarInterface(CarInterfaceBase):
       # Handle CF_Clu_CruiseSwState changing buttons mid-press
       if self.CS.cruise_buttons[-1] != 0 and self.CS.prev_cruise_buttons != 0:
         buttonEvents.append(create_button_event(0, self.CS.prev_cruise_buttons, BUTTONS_DICT))
+        # ajouatom
+        if self.CS.cruise_buttons[-1] != 0:
+          but = self.CS.cruise_buttons[-1]
+          if but == Buttons.GAP_DIST:
+            cruiseGap = self.cruiseGap + 1
+            if cruiseGap > 4:
+              cruiseGap = 1
+            self.cruiseGap = cruiseGap
 
       ret.buttonEvents = buttonEvents
       events.events.extend(create_button_enable_events(ret.buttonEvents))
 
+    if not self.CS.CP.openpilotLongitudinalControl:
+      self.cruiseGap = ret.cruiseState.cruiseGap # ajouatom: carstate���� �о��..
+
+    ret.cruiseState.cruiseGap = self.cruiseGap  #ajouatom      
     # low speed steer alert hysteresis logic (only for cars with steer cut off above 10 m/s)
     if ret.vEgo < (self.CP.minSteerSpeed + 2.) and self.CP.minSteerSpeed > 10.:
       self.low_speed_alert = True
