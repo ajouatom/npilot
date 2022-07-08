@@ -461,7 +461,7 @@ class Controls:
       #self.v_cruise_kph = update_v_cruise(self.v_cruise_kph, CS.vEgo, CS.gasPressed, CS.buttonEvents,
       #                                    self.button_timers, self.enabled, self.is_metric)
       self.v_cruise_kph = self.cruise_helper.update_v_cruise2(self.v_cruise_kph, CS.buttonEvents, self.enabled, self.is_metric, self, CS)
-      #self.cruise_helper.update_cruise_navi(self, CS)
+      self.cruise_helper.update_cruise_navi(self, CS)
                                           
     else:
       if CS.cruiseState.available:
