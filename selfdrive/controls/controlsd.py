@@ -142,7 +142,7 @@ class Controls:
     # START: Try to enable radar tracks
     print("Try to enable radar tracks")
     # if self.CP.openpilotLongitudinalControl and self.CP.carFingerprint in [HYUNDAI_CAR.SANTA_FE_2022]:
-    if self.CP.carFingerprint in [CAR.SANTA_FE_HEV_2022]:
+    if True: #self.CP.carFingerprint in [CAR.SANTA_FE_HEV_2022]:
       rdr_fw = None
       for fw in self.CP.carFw:
         if fw.ecu == "fwdRadar":
