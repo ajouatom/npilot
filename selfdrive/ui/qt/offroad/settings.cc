@@ -588,6 +588,13 @@ CommunityPanel::CommunityPanel(QWidget* parent) : QWidget(parent) {
       toggleLayout->addWidget(horizontal_line());
     }
     toggleLayout->addWidget(toggle);
+  toggleLayout->addWidget(new CValueControl("AutoResumeFromGasSpeed", "CruiseON:Gas_Speed", "Enable Cruise control from Gas, Speed", "../assets/offroad/icon_road.png", 20, 40, 5));
+  toggleLayout->addWidget(new ParamControl("AutoResumeFromBrakeRelease", "CruiseON:BrakeRelease", "While Driving\nCruise On when radar detected over a certain distance ", "../assets/offroad/icon_road.png", this));
+  toggleLayout->addWidget(new CValueControl("AutoResumeFromBrakeReleaseDist", "CruiseON:BrakeReleaseDist", "While Driving\nMinimum Cruise On Distance\nDuring long control, it may operate abnormally due to surrounding obstacles.", "../assets/offroad/icon_road.png", 0, 80, 5));
+  toggleLayout->addWidget(new ParamControl("AutoResumeFromBrakeReleaseLeadCar", "CruiseON:BrakeReleaseStop", "While Stopping\nCruise On when radar dected within 10M", "../assets/offroad/icon_road.png", this));
+  toggleLayout->addWidget(horizontal_line());
+  toggleLayout->addWidget(new ParamControl("AutoResumeFromGas", "CruiseON:Gas", "Enable Cruise control from Gas", "../assets/offroad/icon_road.png", this));
+  toggleLayout->addWidget(new ParamControl("AutoCurveSpeedCtrl", "SpeedControl: Vision Curve", "Neokii", "../assets/offroad/icon_road.png", this));
   }
 }
 
@@ -688,4 +695,80 @@ LateralControl::LateralControl(QWidget* parent): QWidget(parent) {
     });
 
   main_layout->addWidget(list);
+}
+// ajouatom
+CValueControl::CValueControl(const QString& params, const QString& title, const QString& desc, const QString& icon, int min, int max, int unit/*=1*/) : AbstractControl(title, desc, icon)
+{
+
+    m_params = params;
+    m_min = min;
+    m_max = max;
+    m_unit = unit;
+
+    label.setAlignment(Qt::AlignVCenter | Qt::AlignRight);
+    label.setStyleSheet("color: #e0e879");
+    hlayout->addWidget(&label);
+
+    btnminus.setStyleSheet(R"(
+    padding: 0;
+    border-radius: 50px;
+    font-size: 35px;
+    font-weight: 500;
+    color: #E4E4E4;
+    background-color: #393939;
+  )");
+    btnplus.setStyleSheet(R"(
+    padding: 0;
+    border-radius: 50px;
+    font-size: 35px;
+    font-weight: 500;
+    color: #E4E4E4;
+    background-color: #393939;
+  )");
+    btnminus.setFixedSize(150, 100);
+    btnplus.setFixedSize(150, 100);
+    hlayout->addWidget(&btnminus);
+    hlayout->addWidget(&btnplus);
+
+    QObject::connect(&btnminus, &QPushButton::released, [=]() {
+        auto str = QString::fromStdString(Params().get(m_params.toStdString()));
+        int value = str.toInt();
+        value = value - m_unit;
+        if (value < m_min) {
+            value = m_min;
+        }
+        else {
+        }
+
+        //UIScene& scene = uiState()->scene;//QUIState::ui_state.scene;
+        //scene.scr.autoFocus = value;
+        QString values = QString::number(value);
+        Params().put(m_params.toStdString(), values.toStdString());
+        refresh();
+    });
+
+    QObject::connect(&btnplus, &QPushButton::released, [=]() {
+        auto str = QString::fromStdString(Params().get(m_params.toStdString()));
+        int value = str.toInt();
+        value = value + m_unit;
+        if (value > m_max) {
+            value = m_max;
+        }
+        else {
+        }
+
+        //UIScene& scene = uiState()->scene;//QUIState::ui_state.scene;
+        //scene.scr.autoFocus = value;
+        QString values = QString::number(value);
+        Params().put(m_params.toStdString(), values.toStdString());
+        refresh();
+    });
+    refresh();
+}
+
+void CValueControl::refresh()
+{
+    label.setText(QString::fromStdString(Params().get(m_params.toStdString())));
+    btnminus.setText("－");
+    btnplus.setText("＋");
 }

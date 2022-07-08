@@ -47,6 +47,12 @@ def manager_init() -> None:
     # HKG
     ("LateralControl", "TORQUE"),
     ("ShowDebugUI", "0"),
+    ("AutoResumeFromGas", "1"),
+    ("AutoResumeFromGasSpeed", "30"),
+    ("AutoCurveSpeedCtrl", "1"),
+    ("AutoResumeFromBrakeRelease", "1"),
+    ("AutoResumeFromBrakeReleaseDist", "10"),
+    ("AutoResumeFromBrakeReleaseLeadCar", "1"),
   ]
   if not PC:
     default_params.append(("LastUpdateTime", datetime.datetime.utcnow().isoformat().encode('utf8')))
