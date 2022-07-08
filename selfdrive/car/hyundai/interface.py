@@ -379,6 +379,10 @@ class CarInterface(CarInterfaceBase):
 
   def _update(self, c):
     ret = self.CS.update(self.cp, self.cp_cam)
+    #ajouatom
+    if not self.CS.CP.openpilotLongitudinalControl:# and c.enabled:
+      ret.cruiseState.enabled = ret.cruiseState.available
+
     ret.steeringRateLimited = self.CC.steer_rate_limited if self.CC is not None else False
 
     # On some newer model years, the CANCEL button acts as a pause/resume button based on the PCM state

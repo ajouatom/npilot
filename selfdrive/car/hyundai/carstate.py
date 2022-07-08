@@ -28,6 +28,9 @@ class CarState(CarStateBase):
     else:  # preferred and elect gear methods use same definition
       self.shifter_values = can_define.dv["LVR12"]["CF_Lvr_Gear"]
 
+     #ajouatom
+    self.steerErrorCount = 0
+
     self.brake_error = False
     self.park_brake = False
     self.buttons_counter = 0
@@ -64,7 +67,9 @@ class CarState(CarStateBase):
     ret.steeringTorque = cp.vl["MDPS12"]["CR_Mdps_StrColTq"]
     ret.steeringTorqueEps = cp.vl["MDPS12"]["CR_Mdps_OutTq"]
     ret.steeringPressed = abs(ret.steeringTorque) > self.params.STEER_THRESHOLD
-    ret.steerFaultTemporary = cp.vl["MDPS12"]["CF_Mdps_ToiUnavail"] != 0 or cp.vl["MDPS12"]["CF_Mdps_ToiFlt"] != 0
+    #ret.steerFaultTemporary = cp.vl["MDPS12"]["CF_Mdps_ToiUnavail"] != 0 or cp.vl["MDPS12"]["CF_Mdps_ToiFlt"] != 0
+    self.steerErrorCount += 1 if cp.vl["MDPS12"]["CF_Mdps_ToiUnavail"] != 0 or cp.vl["MDPS12"]["CF_Mdps_ToiFlt"] != 0 else -self.steerErrorCount
+    ret.steerFaultTemporary = self.steerErrorCount > 100
 
     # cruise state
     if self.CP.openpilotLongitudinalControl:
@@ -79,11 +84,14 @@ class CarState(CarStateBase):
       speed_conv = CV.MPH_TO_MS if cp.vl["CLU11"]["CF_Clu_SPEED_UNIT"] else CV.KPH_TO_MS
       ret.cruiseState.speed = cp.vl["SCC11"]["VSetDis"] * speed_conv
 
+      ret.cruiseState.cruiseGap = cp.vl["SCC11"]["TauGapSet"]
+      ret.cruiseState.enabled = ret.cruiseState.available #ajouatom: always enable cruise...
     # TODO: Find brake pressure
     ret.brake = 0
     ret.brakePressed = cp.vl["TCS13"]["DriverBraking"] != 0
     ret.brakeHoldActive = cp.vl["TCS15"]["AVH_LAMP"] == 2 # 0 OFF, 1 ERROR, 2 ACTIVE, 3 READY
     ret.parkingBrake = cp.vl["TCS13"]["PBRAKE_ACT"] == 1
+    ret.brakeLights = bool(cp.vl["TCS13"]["BrakeLight"] or ret.brakePressed)
 
     if self.CP.carFingerprint in (HYBRID_CAR | EV_CAR):
       if self.CP.carFingerprint in HYBRID_CAR:
@@ -128,6 +136,11 @@ class CarState(CarStateBase):
     self.prev_cruise_buttons = self.cruise_buttons[-1]
     self.cruise_buttons.extend(cp.vl_all["CLU11"]["CF_Clu_CruiseSwState"])
     self.main_buttons.extend(cp.vl_all["CLU11"]["CF_Clu_CruiseSwMain"])
+    tpms_unit = cp.vl["TPMS11"]["UNIT"] * 0.725 if int(cp.vl["TPMS11"]["UNIT"]) > 0 else 1.
+    ret.tpms.fl = tpms_unit * cp.vl["TPMS11"]["PRESSURE_FL"]
+    ret.tpms.fr = tpms_unit * cp.vl["TPMS11"]["PRESSURE_FR"]
+    ret.tpms.rl = tpms_unit * cp.vl["TPMS11"]["PRESSURE_RL"]
+    ret.tpms.rr = tpms_unit * cp.vl["TPMS11"]["PRESSURE_RR"]
 
     return ret
 
@@ -216,8 +229,11 @@ class CarState(CarStateBase):
       ("CF_Clu_AliveCnt1", "CLU11"),
 
       ("ACCEnable", "TCS13"),
+      ("BrakeLight", "TCS13"),
+      ("DCEnable", "TCS13"),
       ("ACC_REQ", "TCS13"),
       ("DriverBraking", "TCS13"),
+      ("DriverOverride", "TCS13"), # scc smoother
       ("StandStill", "TCS13"),
       ("PBRAKE_ACT", "TCS13"),
 
@@ -232,6 +248,11 @@ class CarState(CarStateBase):
 
       ("SAS_Angle", "SAS11"),
       ("SAS_Speed", "SAS11"),
+      ("UNIT", "TPMS11"),
+      ("PRESSURE_FL", "TPMS11"),
+      ("PRESSURE_FR", "TPMS11"),
+      ("PRESSURE_RL", "TPMS11"),
+      ("PRESSURE_RR", "TPMS11"),
     ]
     checks = [
       # address, frequency
@@ -245,6 +266,7 @@ class CarState(CarStateBase):
       ("CGW4", 5),
       ("WHL_SPD11", 50),
       ("SAS11", 100),
+      ("TPMS11", 5),
     ]
 
     if not CP.openpilotLongitudinalControl:
@@ -253,6 +275,7 @@ class CarState(CarStateBase):
         ("VSetDis", "SCC11"),
         ("SCCInfoDisplay", "SCC11"),
         ("ACC_ObjDist", "SCC11"),
+        ("TauGapSet", "SCC11"),
         ("ACCMode", "SCC12"),
       ]
       checks += [
@@ -324,11 +347,13 @@ class CarState(CarStateBase):
       ("CF_Lkas_LdwsRHWarning", "LKAS11"),
       ("CF_Lkas_HbaLamp", "LKAS11"),
       ("CF_Lkas_FcwBasReq", "LKAS11"),
+      ("CF_Lkas_ToiFlt", "LKAS11"),
       ("CF_Lkas_HbaSysState", "LKAS11"),
       ("CF_Lkas_FcwOpt", "LKAS11"),
       ("CF_Lkas_HbaOpt", "LKAS11"),
       ("CF_Lkas_FcwSysState", "LKAS11"),
       ("CF_Lkas_FcwCollisionWarning", "LKAS11"),
+      ("CF_Lkas_MsgCount", "LKAS11"),
       ("CF_Lkas_FusionState", "LKAS11"),
       ("CF_Lkas_FcwOpt_USM", "LKAS11"),
       ("CF_Lkas_LdwsOpt_USM", "LKAS11"),
