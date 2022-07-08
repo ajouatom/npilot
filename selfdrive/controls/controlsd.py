@@ -579,8 +579,9 @@ class Controls:
     CC.latActive = self.active and not CS.steerFaultTemporary and not CS.steerFaultPermanent and \
                      CS.vEgo > self.CP.minSteerSpeed and not CS.standstill
     ##CC.longActive = self.active and not self.events.any(ET.OVERRIDE) and self.CP.openpilotLongitudinalControl
+    longActive1 = self.active and not self.events.any(ET.OVERRIDE) and self.CP.openpilotLongitudinalControl
     cruiseSuspended = self.cruise_helper.cruiseSuspended
-    CC.longActive = self.active and not cruiseSuspended
+    CC.longActive = longActive1 and not cruiseSuspended
     CC.hudControl.cruiseSuspended = cruiseSuspended
     radar = self.sm['radarState']
     if radar.leadOne.status:

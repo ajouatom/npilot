@@ -120,7 +120,7 @@ class CarController:
         d = hud_control.leadDistance
         objGap = 0 if d == 0 else 2 if d < 25 else 3 if d < 40 else 4 if d < 70 else 5 
         
-        can_sends.extend(hyundaican.create_acc_commands(self.packer, CC.longActive, accel, jerk, int(self.frame / 2),
+        can_sends.extend(hyundaican.create_acc_commands(self.packer, CC.enabled, accel, jerk, int(self.frame / 2),
                                                         hud_control.leadVisible, set_speed_in_units, stopping, CS.out.gasPressed, CS.out.cruiseState.cruiseGap, objGap))
         self.accel = accel
 
