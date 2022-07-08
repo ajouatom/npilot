@@ -35,7 +35,7 @@ def create_lkas11(packer, frame, car_fingerprint, apply_steer, steer_req,
     # SysWarning 5 = keep hands on wheel (red)
     # SysWarning 6 = keep hands on wheel (red) + beep
     # Note: the warning is hidden while the blinkers are on
-    values["CF_Lkas_SysWarning"] = 4 if sys_warning else 0
+    values["CF_Lkas_SysWarning"] = 0 #4 if sys_warning else 0
 
   elif car_fingerprint == CAR.HYUNDAI_GENESIS:
     # This field is actually LdwsActivemode
@@ -78,16 +78,16 @@ def create_lfahda_mfc(packer, enabled, hda_set_speed=0):
   }
   return packer.make_can_msg("LFAHDA_MFC", 0, values)
 
-def create_acc_commands(packer, enabled, accel, jerk, idx, lead_visible, set_speed, stopping, gas_pressed):
+def create_acc_commands(packer, enabled, accel, jerk, idx, lead_visible, set_speed, stopping, gas_pressed, cruiseGap, objGap):
   commands = []
 
   scc11_values = {
     "MainMode_ACC": 1,
-    "TauGapSet": 4,
+    "TauGapSet": cruiseGap,
     "VSetDis": set_speed if enabled else 0,
     "AliveCounterACC": idx % 0x10,
-    "ObjValid": 0,  # TODO: these two bits may allow for better longitudinal control
-    "ACC_ObjStatus": 0,
+    "ObjValid": 1 if lead_visible else 0,
+    "ACC_ObjStatus": 1 if lead_visible else 0,
     "ACC_ObjLatPos": 0,
     "ACC_ObjRelSpd": 0,
     "ACC_ObjDist": 0,
@@ -112,7 +112,8 @@ def create_acc_commands(packer, enabled, accel, jerk, idx, lead_visible, set_spe
     "JerkUpperLimit": max(jerk, 1.0) if not stopping else 0, # stock usually is 1.0 but sometimes uses higher values
     "JerkLowerLimit": max(-jerk, 1.0), # stock usually is 0.5 but sometimes uses higher values
     "ACCMode": 2 if enabled and gas_pressed else 1 if enabled else 4, # stock will always be 4 instead of 0 after first disengage
-    "ObjGap": 2 if lead_visible else 0, # 5: >30, m, 4: 25-30 m, 3: 20-25 m, 2: < 20 m, 0: no lead
+    #ajouatom: "ObjGap": 2 if lead_visible else 0, # 5: >30, m, 4: 25-30 m, 3: 20-25 m, 2: < 20 m, 0: no lead
+    "ObjGap": objGap
   }
   commands.append(packer.make_can_msg("SCC14", 0, scc14_values))
 
