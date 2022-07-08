@@ -182,6 +182,12 @@ std::unordered_map<std::string, uint32_t> keys = {
     {"LateralControl", PERSISTENT},
     {"ShowDebugUI", PERSISTENT},
     {"SoftRestartTriggered", CLEAR_ON_MANAGER_START},
+    { "AutoResumeFromGas", PERSISTENT },
+    { "AutoResumeFromGasSpeed", PERSISTENT },
+    { "AutoCurveSpeedCtrl", PERSISTENT },
+    { "AutoResumeFromBrakeRelease", PERSISTENT },
+    { "AutoResumeFromBrakeReleaseDist", PERSISTENT },
+    { "AutoResumeFromBrakeReleaseLeadCar", PERSISTENT },
 };
 
 } // namespace
