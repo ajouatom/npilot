@@ -78,7 +78,7 @@ def create_lfahda_mfc(packer, enabled, hda_set_speed=0):
   }
   return packer.make_can_msg("LFAHDA_MFC", 0, values)
 
-def create_acc_commands(packer, enabled, accel, jerk, idx, lead_visible, set_speed, stopping, gas_pressed, cruiseGap, objGap):
+def create_acc_commands(packer, enabled, longActive, accel, jerk, idx, lead_visible, set_speed, stopping, gas_pressed, cruiseGap, objGap):
   commands = []
 
   scc11_values = {
@@ -95,7 +95,7 @@ def create_acc_commands(packer, enabled, accel, jerk, idx, lead_visible, set_spe
   commands.append(packer.make_can_msg("SCC11", 0, scc11_values))
 
   scc12_values = {
-    "ACCMode": 2 if enabled and gas_pressed else 1 if enabled else 0,
+    "ACCMode": 2 if enabled and gas_pressed and not longActive else 1 if enabled else 0,
     "StopReq": 1 if stopping else 0,
     "aReqRaw": accel,
     "aReqValue": accel,  # stock ramps up and down respecting jerk limit until it reaches aReqRaw
