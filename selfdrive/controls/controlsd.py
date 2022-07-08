@@ -32,6 +32,7 @@ from selfdrive.locationd.calibrationd import Calibration
 from system.hardware import HARDWARE
 from selfdrive.manager.process_config import managed_processes
 from selfdrive.car.hyundai.cruise_helper import CruiseHelper
+from selfdrive.car.hyundai.values import CAR
 from selfdrive.ntune import ntune_common_get, ntune_common_enabled, ntune_scc_get
 
 SOFT_DISABLE_TIME = 3  # seconds
@@ -141,7 +142,7 @@ class Controls:
     # START: Try to enable radar tracks
     print("Try to enable radar tracks")
     # if self.CP.openpilotLongitudinalControl and self.CP.carFingerprint in [HYUNDAI_CAR.SANTA_FE_2022]:
-    if self.CP.carFingerprint in [HYUNDAI_CAR.SANTA_FE_HEV_2022]:
+    if self.CP.carFingerprint in [CAR.SANTA_FE_HEV_2022]:
       rdr_fw = None
       for fw in self.CP.carFw:
         if fw.ecu == "fwdRadar":
