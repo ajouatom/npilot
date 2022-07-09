@@ -180,6 +180,8 @@ std::unordered_map<std::string, uint32_t> keys = {
     {"Offroad_UpdateFailed", CLEAR_ON_MANAGER_START},
     {"SelectedCar", PERSISTENT},
     {"LateralControl", PERSISTENT},
+    {"LaneChangeEnabled", PERSISTENT},
+    {"AutoLaneChangeEnabled", PERSISTENT},
     {"ShowDebugUI", PERSISTENT},
     {"SoftRestartTriggered", CLEAR_ON_MANAGER_START},
     { "AutoResumeFromGas", PERSISTENT },

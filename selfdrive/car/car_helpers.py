@@ -179,6 +179,10 @@ def get_car(logcan, sendcan):
 
   disable_radar = Params().get_bool("DisableRadar")
 
+  selected_car = Params().get("SelectedCar")
+  if selected_car:
+    candidate = selected_car.decode("utf-8")
+
   CarInterface, CarController, CarState = interfaces[candidate]
   CP = CarInterface.get_params(candidate, fingerprints, car_fw, disable_radar)
   CP.carVin = vin

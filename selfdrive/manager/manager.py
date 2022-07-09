@@ -46,6 +46,8 @@ def manager_init() -> None:
 
     # HKG
     ("LateralControl", "TORQUE"),
+    ("LaneChangeEnabled", "0"),
+    ("AutoLaneChangeEnabled", "0"),
     ("ShowDebugUI", "0"),
     ("AutoResumeFromGas", "1"),
     ("AutoResumeFromGasSpeed", "30"),

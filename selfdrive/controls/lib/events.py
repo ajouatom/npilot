@@ -939,6 +939,13 @@ EVENTS: Dict[int, Dict[str, Union[Alert, AlertCallbackType]]] = {
     ET.NO_ENTRY: NoEntryAlert("LKAS Disabled"),
   },
 
+  EventName.isgActive: {
+    ET.WARNING: Alert(
+      "Steering paused, ISG is working",
+      "",
+      AlertStatus.normal, AlertSize.small,
+      Priority.LOW, VisualAlert.none, AudibleAlert.none, .1, alert_rate=0.75),
+  },
   EventName.cruisePaused: {
     ET.WARNING: EngagementAlert(AudibleAlert.prompt),
   },
