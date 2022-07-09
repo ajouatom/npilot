@@ -416,6 +416,7 @@ class CarInterface(CarInterfaceBase):
       self.cruiseGap = ret.cruiseState.cruiseGap # ajouatom: carstate���� �о��..
 
     ret.cruiseState.cruiseGap = self.cruiseGap  #ajouatom      
+    ret.cruiseGap = self.cruiseGap
     # low speed steer alert hysteresis logic (only for cars with steer cut off above 10 m/s)
     if ret.vEgo < (self.CP.minSteerSpeed + 2.) and self.CP.minSteerSpeed > 10.:
       self.low_speed_alert = True
