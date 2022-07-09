@@ -802,6 +802,8 @@ class Controls:
     steer_angle_without_offset = math.radians(CS.steeringAngleDeg - params.angleOffsetDeg)
     curvature = -self.VM.calc_curvature(steer_angle_without_offset, CS.vEgo, params.roll)
 
+    self.cruise_helper.curvature = curvature  #ajouatom
+
     # controlsState
     dat = messaging.new_message('controlsState')
     dat.valid = CS.canValid
