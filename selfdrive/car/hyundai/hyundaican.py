@@ -84,7 +84,7 @@ def create_acc_commands(packer, enabled, longActive, accel, jerk, idx, lead_visi
   scc11_values = {
     "MainMode_ACC": 1,
     "TauGapSet": cruiseGap,
-    "VSetDis": set_speed if enabled and not longActive else 0,
+    "VSetDis": set_speed if enabled and longActive else 0,
     "AliveCounterACC": idx % 0x10,
     "ObjValid": 1 if lead_visible else 0,
     "ACC_ObjStatus": 1 if lead_visible else 0,
