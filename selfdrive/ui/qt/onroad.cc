@@ -1265,7 +1265,7 @@ void NvgWindow::drawDebugText(QPainter &p) {
   str.sprintf("Lead: %.1f/%.1f/%.1f\n", radar_dist, vision_dist, (radar_dist - vision_dist));
   p.drawText(text_x, y, str);
 
-
+#if 0
   const auto lmd = sm["liveMapData"].getLiveMapData();
   const uint64_t lmd_fix_time = lmd.getLastGpsTimestamp();
   const uint64_t current_ts = std::chrono::duration_cast<std::chrono::milliseconds>
@@ -1276,7 +1276,7 @@ void NvgWindow::drawDebugText(QPainter &p) {
   str1 += show_road_name ? QString::fromStdString(lmd.getCurrentRoadName()) : "";
   y += height;
   p.drawText(text_x, y, str1);
-
+#endif
 
   p.restore();
 }
