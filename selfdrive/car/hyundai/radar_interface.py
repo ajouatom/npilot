@@ -40,6 +40,7 @@ class RadarInterface(RadarInterfaceBase):
     self.radar_off_can = CP.radarOffCan
     self.rcp = get_radar_can_parser(CP)
 
+  # controlsd 에서 radar tracks enable하고 .... 아래 update()를 사용해야 radar tracks 활성화~~
   def update(self, can_strings):
     # This one causes my radar points to not work
     # if self.radar_off_can or (self.rcp is None):
