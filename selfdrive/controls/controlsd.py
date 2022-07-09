@@ -34,6 +34,7 @@ from selfdrive.manager.process_config import managed_processes
 from selfdrive.car.hyundai.cruise_helper import CruiseHelper
 from selfdrive.car.hyundai.values import CAR
 from selfdrive.ntune import ntune_common_get, ntune_common_enabled, ntune_scc_get
+from selfdrive.car.isotp_parallel_query import IsoTpParallelQuery
 
 SOFT_DISABLE_TIME = 3  # seconds
 LDW_MIN_SPEED = 31 * CV.MPH_TO_MS
