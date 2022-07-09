@@ -1271,9 +1271,9 @@ void NvgWindow::drawDebugText(QPainter &p) {
   const uint64_t current_ts = std::chrono::duration_cast<std::chrono::milliseconds>
       (std::chrono::system_clock::now().time_since_epoch()).count();
   const bool show_road_name = current_ts - lmd_fix_time < 10000; // hide if fix older than 10s
-  str.sprintf("roadName: %s\n", show_road_name ? QString::fromStdString(lmd.getCurrentRoadName()) : "");
+  //str.sprintf("roadName: %s\n", show_road_name ? QString::fromStdString(lmd.getCurrentRoadName()) : "");
   y += height;
-  p.drawText(text_x, y, str);
+  p.drawText(text_x, y, show_road_name ? QString::fromStdString(lmd.getCurrentRoadName()) : "");
 
 
   p.restore();
