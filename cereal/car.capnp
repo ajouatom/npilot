@@ -119,6 +119,7 @@ struct CarEvent @0x9b1657f34caf3ad3 {
 
     cruisePaused @117; #ajouatom
     cruiseResume @118; #ajouatom
+    isgActive @119; #ajouatom
     
     radarCanErrorDEPRECATED @15;
     communityFeatureDisallowedDEPRECATED @62;
