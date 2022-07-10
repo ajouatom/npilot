@@ -85,6 +85,15 @@ const QColor bg_colors [] = {
   [STATUS_ALERT] = QColor(0xC9, 0x22, 0x31, 0xf1),
 };
 
+typedef struct {
+  float x, y;
+} vertex_data;
+
+typedef struct {
+  vertex_data v[TRAJECTORY_SIZE * 2];
+  int cnt;
+} line_vertices_data;
+
 typedef struct UIScene {
   bool calibration_valid = false;
   mat3 view_from_calib = DEFAULT_CALIBRATION;
@@ -96,7 +105,7 @@ typedef struct UIScene {
   QPolygonF track_vertices;
   QPolygonF lane_line_vertices[4];
   QPolygonF road_edge_vertices[2];
-  QPolygonF stop_line_vertices;
+  line_vertices_data stop_line_vertices;
 
   // lead
   QPointF lead_vertices[2];
