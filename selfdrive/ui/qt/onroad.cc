@@ -455,10 +455,6 @@ void NvgWindow::drawText2(QPainter &p, int x, int y, int flags, const QString &t
   p.setPen(color);
   p.drawText(QRect(x, y, rect.width()+1, rect.height()), flags, text);
 }
-static void ui_draw_stop_line(UIState* s, const cereal::ModelDataV2::StopLineData::Reader& stop_line_data, const line_vertices_data& vd) {
-    NVGcolor color = nvgRGBAf(0.7, 0.0, 0.0, stop_line_data.getProb());
-    ui_draw_line(s, vd, &color, nullptr);
-}
 
 void NvgWindow::drawHud(QPainter &p, const cereal::ModelDataV2::Reader &model) {
 
