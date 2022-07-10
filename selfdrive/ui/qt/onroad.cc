@@ -370,6 +370,17 @@ void NvgWindow::drawLead(QPainter &painter, const cereal::ModelDataV2::LeadDataV
   painter.restore();
 }
 
+void NvgWindow::drawStopLine(QPainter& painter, const UIState* s, const cereal::ModelDataV2::StopLineData::Reader &stop_line_data, const line_vertices_data &vd) {
+    painter.save();
+
+    const UIScene& scene = s->scene;
+    painter.setBrush(QColor::fromRgbF(0.7, 0.0, 0.0, std::clamp<float>(stop_line_data.getProb(), 0.0, 0.7)));
+    painter.drawPolygon(vd);
+
+    painter.restore();
+}
+
+
 void NvgWindow::paintGL() {
 }
 
@@ -444,6 +455,10 @@ void NvgWindow::drawText2(QPainter &p, int x, int y, int flags, const QString &t
   p.setPen(color);
   p.drawText(QRect(x, y, rect.width()+1, rect.height()), flags, text);
 }
+static void ui_draw_stop_line(UIState* s, const cereal::ModelDataV2::StopLineData::Reader& stop_line_data, const line_vertices_data& vd) {
+    NVGcolor color = nvgRGBAf(0.7, 0.0, 0.0, stop_line_data.getProb());
+    ui_draw_line(s, vd, &color, nullptr);
+}
 
 void NvgWindow::drawHud(QPainter &p, const cereal::ModelDataV2::Reader &model) {
 
@@ -478,6 +493,13 @@ void NvgWindow::drawHud(QPainter &p, const cereal::ModelDataV2::Reader &model) {
   drawRestArea(p);
   //drawTurnSignals(p);
   drawGpsStatus(p);
+  if (s->scene.longitudinalPlan.stopline[12] > 3.0) {
+      auto stop_line = (*s->sm)["modelV2"].getModelV2().getStopLine();
+      if (stop_line.getProb() > .5) {
+          //ui_draw_stop_line(s, stop_line, s->scene.stop_line_vertices);
+          drawStopLine(p, s, stop_line, s->scene.stop_line_vertices);
+      }
+  }
 
   if(s->show_debug && width() > 1200)
     drawDebugText(p);
@@ -486,20 +508,25 @@ void NvgWindow::drawHud(QPainter &p, const cereal::ModelDataV2::Reader &model) {
   //const auto car_params = sm["carParams"].getCarParams();
   const auto live_params = sm["liveParameters"].getLiveParameters();
 
-  int mdps_bus = 0;// car_params.getMdpsBus();
-  int scc_bus = 0;// car_params.getSccBus();
+  int trafficLight = 0;
+  if (s->scene.longitudinalPlan.e2ex[12] > 30 && (s->scene.longitudinalPlan.stopline[12] < 10 || s->scene.longitudinalPlan.stopline[12] == 400)) { // && s->scene.car_state.getVEgo() > 0.5) {
+      //ui_draw_image(s, { TRsign_x, TRsign_y, TRsign_w, TRsign_h }, "trafficLight_green", 0.8f);
+      trafficLight = 1;
+  }
+  else if (s->scene.longitudinalPlan.e2ex[12] > 0 && s->scene.longitudinalPlan.e2ex[12] < 100 && s->scene.longitudinalPlan.stopline[12] < 100 && s->scene.longitudinalPlan.stopline[12] != 400) {
+      //ui_draw_image(s, { TRsign_x, TRsign_y, TRsign_w, TRsign_h }, "trafficLight_red", 0.8f);
+      //ui_draw_image(s, { 960 - 175 + 420, 540 - 150, 350, 350 }, "stopman", 0.8f);
+      trafficLight = 2;
+  }
 
   QString infoText;
-  infoText.sprintf("%s AO(%.2f/%.2f) SR(%.2f) SAD(%.2f) BUS(MDPS %d, SCC %d) SCC(%.2f/%.2f/%.2f)",
+  infoText.sprintf("%s AO(%.2f/%.2f) SR(%.2f) SAD(%.2f) LED(%s)",
                       s->lat_control.c_str(),
                       live_params.getAngleOffsetDeg(),
                       live_params.getAngleOffsetAverageDeg(),
                       controls_state.getSteerRatio(),
                       controls_state.getSteerActuatorDelay(),
-                      mdps_bus, scc_bus,
-                      0.,//controls_state.getSccGasFactor(),
-                      0.,//controls_state.getSccBrakeFactor(),
-                      0.//controls_state.getSccCurvatureFactor()
+                      (trafficLight==2)?"RED":(trafficLight==1)?"GREEN":"NONE"
                       );
 
   // info

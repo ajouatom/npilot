@@ -191,6 +191,27 @@ static void update_state(UIState *s) {
 
     scene.light_sensor = std::clamp<float>(1.0 - (ev / max_ev), 0.0, 1.0);
   }
+  if (sm.updated("longitudinalPlan")) {
+      scene.longitudinal_plan = sm["longitudinalPlan"].getLongitudinalPlan();
+      auto lop_data = sm["longitudinalPlan"].getLongitudinalPlan();
+      for (int i = 0; i < std::size(scene.longitudinalPlan.e2ex); i++) {
+          scene.longitudinalPlan.e2ex[i] = lop_data.getE2eX()[i];
+      }
+      for (int i = 0; i < std::size(scene.longitudinalPlan.lead0); i++) {
+          scene.longitudinalPlan.lead0[i] = lop_data.getLead0Obstacle()[i];
+      }
+      for (int i = 0; i < std::size(scene.longitudinalPlan.lead1); i++) {
+          scene.longitudinalPlan.lead1[i] = lop_data.getLead1Obstacle()[i];
+      }
+      for (int i = 0; i < std::size(scene.longitudinalPlan.cruisetg); i++) {
+          scene.longitudinalPlan.cruisetg[i] = lop_data.getCruiseTarget()[i];
+      }
+      for (int i = 0; i < std::size(scene.longitudinalPlan.stopline); i++) {
+          scene.longitudinalPlan.stopline[i] = lop_data.getStopLine()[i];
+      }
+      scene.longitudinalPlan.stopprob = lop_data.getStoplineProb();
+  }
+
   if( scene.IsOpenpilotViewEnabled )
     scene.started = sm["deviceState"].getDeviceState().getStarted();
   else

@@ -105,6 +105,7 @@ typedef struct UIScene {
   bool started, ignition, is_metric, longitudinal_control, end_to_end;
   uint64_t started_frame;
   cereal::DeviceState::Reader deviceState;
+  cereal::LongitudinalPlan::Reader longitudinal_plan;
   int  IsOpenpilotViewEnabled;
 } UIScene;
 
