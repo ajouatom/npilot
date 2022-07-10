@@ -51,10 +51,12 @@ def manager_init() -> None:
     ("ShowDebugUI", "0"),
     ("AutoResumeFromGas", "1"),
     ("AutoResumeFromGasSpeed", "30"),
+    ("OpkrPrebuiltOn", "0"),
     ("AutoCurveSpeedCtrl", "1"),
     ("AutoResumeFromBrakeRelease", "1"),
     ("AutoResumeFromBrakeReleaseDist", "10"),
     ("AutoResumeFromBrakeReleaseLeadCar", "1"),
+    ("IsOpenpilotViewEnabled", "0"),
   ]
   if not PC:
     default_params.append(("LastUpdateTime", datetime.datetime.utcnow().isoformat().encode('utf8')))
@@ -181,6 +183,15 @@ def manager_thread() -> None:
 
 
 def main() -> None:
+  preBuiltOn = Params().get_bool("OpkrPrebuiltOn")
+  preBuiltFile = '/data/openpilot/prebuilt'
+  if not os.path.isdir("/data/openpilot"):
+      pass
+  elif not os.path.isfile(preBuiltFile) and preBuiltOn:
+    os.system("cd /data/openpilot; touch prebuilt")
+  elif os.path.isfile(preBuiltFile) and not preBuiltOn:
+    os.system("cd /data/openpilot; rm -f prebuilt")
+
   prepare_only = os.getenv("PREPAREONLY") is not None
 
   manager_init()

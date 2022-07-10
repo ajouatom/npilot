@@ -575,6 +575,34 @@ CommunityPanel::CommunityPanel(QWidget* parent) : QWidget(parent) {
     }
   )");
 
+  auto updateBtn = new ButtonControl("업데이트 체크 및 적용", "업데이트");
+  QObject::connect(updateBtn, &ButtonControl::clicked, [=]()
+  {
+      const char* gitcommit = "/data/openpilot/selfdrive/assets/addon/sh/gitcommit.sh";
+      const char* gitpull = "/data/openpilot/selfdrive/assets/addon/sh/gitpull.sh";
+
+
+      std::system(gitcommit);
+      std::system("date '+%F %T' > /data/params/d/LastUpdateTime");
+      QString desc = "";
+      QString commit_local = QString::fromStdString(Params().get("GitCommit").substr(0, 7));
+      QString commit_remote = QString::fromStdString(Params().get("GitCommitRemote").substr(0, 7));
+
+      desc += QString("(로컬/리모트): %1/%2\n").arg(commit_local, commit_remote);
+      if (commit_local == commit_remote) {
+          desc += QString("로컬과 리모트가 일치합니다.");
+      }
+      else {
+          desc += QString("업데이트가 있습니다.");
+      }
+      if (ConfirmationDialog::confirm(desc, this)) {
+          //Params().putBool("OpkrPrebuiltOn", 0);
+          std::system("cd /data/openpilot; rm -f prebuilt");
+          std::system(gitpull);
+      }
+  });
+  toggleLayout->addWidget(updateBtn);
+  toggleLayout->addWidget(new CPrebuiltToggle());
   QList<ParamControl*> toggles;
 
   toggles.append(new ParamControl("LaneChangeEnabled",
@@ -600,6 +628,7 @@ CommunityPanel::CommunityPanel(QWidget* parent) : QWidget(parent) {
     }
     toggleLayout->addWidget(toggle);
   }
+  toggleLayout->addWidget(new ParamControl("IsOpenpilotViewEnabled", "OnRoad Preview", "", "../assets/offroad/icon_shell.png", this));
   toggleLayout->addWidget(new CValueControl("AutoResumeFromGasSpeed", "CruiseON:Gas_Speed", "Enable Cruise control from Gas, Speed", "../assets/offroad/icon_road.png", 20, 40, 5));
   toggleLayout->addWidget(new ParamControl("AutoResumeFromBrakeRelease", "CruiseON:BrakeRelease", "While Driving\nCruise On when radar detected over a certain distance ", "../assets/offroad/icon_road.png", this));
   toggleLayout->addWidget(new CValueControl("AutoResumeFromBrakeReleaseDist", "CruiseON:BrakeReleaseDist", "While Driving\nMinimum Cruise On Distance\nDuring long control, it may operate abnormally due to surrounding obstacles.", "../assets/offroad/icon_road.png", 0, 80, 5));
@@ -782,4 +811,25 @@ void CValueControl::refresh()
     label.setText(QString::fromStdString(Params().get(m_params.toStdString())));
     btnminus.setText("－");
     btnplus.setText("＋");
+}
+
+GitHash::GitHash() : AbstractControl("커밋(로컬/리모트)", "", "") {
+
+    QString lhash = QString::fromStdString(Params().get("GitCommit").substr(0, 10));
+    QString rhash = QString::fromStdString(Params().get("GitCommitRemote").substr(0, 10));
+    hlayout->addStretch(2);
+
+    local_hash.setText(QString::fromStdString(Params().get("GitCommit").substr(0, 10)));
+    remote_hash.setText(QString::fromStdString(Params().get("GitCommitRemote").substr(0, 10)));
+    local_hash.setAlignment(Qt::AlignVCenter);
+    remote_hash.setAlignment(Qt::AlignVCenter);
+    local_hash.setStyleSheet("color: #aaaaaa");
+    if (lhash == rhash) {
+        remote_hash.setStyleSheet("color: #aaaaaa");
+    }
+    else {
+        remote_hash.setStyleSheet("color: #0099ff");
+    }
+    hlayout->addWidget(&local_hash);
+    hlayout->addWidget(&remote_hash);
 }
