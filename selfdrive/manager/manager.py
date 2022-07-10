@@ -57,6 +57,7 @@ def manager_init() -> None:
     ("AutoResumeFromBrakeReleaseDist", "10"),
     ("AutoResumeFromBrakeReleaseLeadCar", "1"),
     ("IsOpenpilotViewEnabled", "0"),
+    ("StoppingDist", "35"),
   ]
   if not PC:
     default_params.append(("LastUpdateTime", datetime.datetime.utcnow().isoformat().encode('utf8')))
