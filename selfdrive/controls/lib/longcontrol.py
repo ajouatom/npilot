@@ -92,7 +92,7 @@ class LongControl:
       dRel = radarState.leadOne.dRel
       vRel = radarState.leadOne.vRel
     if long_plan.hasLead:
-      if 1 < CS.radarDistance <= 149:
+      if 1 < dRel <= 149:
         stop = True if (dRel <= self.stopping_dist and radarState.leadOne.status) else False
       else:
         stop = True if (dRel < 6.0 and radarState.leadOne.status) else False
