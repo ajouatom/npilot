@@ -74,28 +74,29 @@ static void update_leads(UIState *s, const cereal::RadarState::Reader &radar_sta
   }
 }
 
-static void update_line_data(const UIState *s, const cereal::ModelDataV2::XYZTData::Reader &line,
-                             float y_off, float z_off, QPolygonF *pvd, int max_idx, bool allow_invert=true) {
-  const auto line_x = line.getX(), line_y = line.getY(), line_z = line.getZ();
+static void update_line_data(const UIState* s, const cereal::ModelDataV2::XYZTData::Reader& line,
+    float y_off, float z_off, QPolygonF* pvd, int max_idx, bool allow_invert = true) {
+    const auto line_x = line.getX(), line_y = line.getY(), line_z = line.getZ();
 
-  QPolygonF left_points, right_points;
-  left_points.reserve(max_idx + 1);
-  right_points.reserve(max_idx + 1);
+    QPolygonF left_points, right_points;
+    left_points.reserve(max_idx + 1);
+    right_points.reserve(max_idx + 1);
 
-  for (int i = 0; i <= max_idx; i++) {
-    QPointF left, right;
-    bool l = calib_frame_to_full_frame(s, line_x[i], line_y[i] - y_off, line_z[i] + z_off, &left);
-    bool r = calib_frame_to_full_frame(s, line_x[i], line_y[i] + y_off, line_z[i] + z_off, &right);
-    if (l && r) {
-      // For wider lines the drawn polygon will "invert" when going over a hill and cause artifacts
-      if (!allow_invert && left_points.size() && left.y() > left_points.back().y()) {
-        continue;
-      }
-      left_points.push_back(left);
-      right_points.push_front(right);
+    for (int i = 0; i <= max_idx; i++) {
+        QPointF left, right;
+        bool l = calib_frame_to_full_frame(s, line_x[i], line_y[i] - y_off, line_z[i] + z_off, &left);
+        bool r = calib_frame_to_full_frame(s, line_x[i], line_y[i] + y_off, line_z[i] + z_off, &right);
+        if (l && r) {
+            // For wider lines the drawn polygon will "invert" when going over a hill and cause artifacts
+            if (!allow_invert && left_points.size() && left.y() > left_points.back().y()) {
+                continue;
+            }
+            left_points.push_back(left);
+            right_points.push_front(right);
+        }
     }
-  }
-  *pvd = left_points + right_points;
+    *pvd = left_points + right_points;
+}
 static void update_stop_line_data(const UIState *s, const cereal::ModelDataV2::StopLineData::Reader &line,
                                   float x_off, float y_off, float z_off, line_vertices_data *pvd) {
   const auto line_x = line.getX(), line_y = line.getY(), line_z = line.getZ();
@@ -107,7 +108,7 @@ static void update_stop_line_data(const UIState *s, const cereal::ModelDataV2::S
   pvd->cnt = v - pvd->v;
   assert(pvd->cnt <= std::size(pvd->v));
 }
-}
+
 
 static void update_model(UIState *s, const cereal::ModelDataV2::Reader &model) {
   UIScene &scene = s->scene;
@@ -141,7 +142,7 @@ static void update_model(UIState *s, const cereal::ModelDataV2::Reader &model) {
   max_idx = get_path_length_idx(model_position, max_distance);
   update_line_data(s, model_position, scene.end_to_end ? 0.9 : 0.5, 1.22, &scene.track_vertices, max_idx, false);
   // update stop lines
-  if (scene.stop_line) {
+  if (1) {//scene.stop_line) {
     const auto stop_line = model.getStopLine();
     if (stop_line.getProb() > .5) {
       update_stop_line_data(s, stop_line, .5, 2, 1.22, &scene.stop_line_vertices);
