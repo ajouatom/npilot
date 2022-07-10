@@ -108,6 +108,16 @@ typedef struct UIScene {
   cereal::DeviceState::Reader deviceState;
   cereal::LongitudinalPlan::Reader longitudinal_plan;
   int  IsOpenpilotViewEnabled;
+
+  struct _LongitudinalPlan
+  {
+      float e2ex[13] = { 0 };
+      float lead0[13] = { 0 };
+      float lead1[13] = { 0 };
+      float cruisetg[13] = { 0 };
+      float stopline[13] = { 0 };
+      float stopprob;
+  } longitudinalPlan;
 } UIScene;
 
 class UIState : public QObject {
