@@ -47,7 +47,6 @@ procs = [
   PythonProcess("paramsd", "selfdrive.locationd.paramsd"),
   PythonProcess("plannerd", "selfdrive.controls.plannerd"),
   PythonProcess("radard", "selfdrive.controls.radard"),
-  #PythonProcess("thermald", "selfdrive.thermald.thermald", persistent=True),
   PythonProcess("thermald", "selfdrive.thermald.thermald", offroad=True),
   PythonProcess("tombstoned", "selfdrive.tombstoned", enabled=not PC, offroad=True),
   PythonProcess("updated", "selfdrive.updated", enabled=not PC, onroad=False, offroad=True),
