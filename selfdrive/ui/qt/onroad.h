@@ -73,6 +73,8 @@ protected:
   QPixmap ic_turn_signal_l;
   QPixmap ic_turn_signal_r;
   QPixmap ic_satellite;
+  QPixmap ic_trafficLight_green;
+  QPixmap ic_trafficLight_red;
 
   QMap<QString, QPixmap> ic_oil_com;
 

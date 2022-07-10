@@ -263,6 +263,9 @@ void NvgWindow::initializeGL() {
   ic_turn_signal_l = QPixmap("../assets/images/turn_signal_l.png");
   ic_turn_signal_r = QPixmap("../assets/images/turn_signal_r.png");
   ic_satellite = QPixmap("../assets/images/satellite.png");
+
+  ic_trafficLight_green = QPixmap("../assets/addon/img/img_trafficLight_green.png");
+  ic_trafficLight_red = QPixmap("../assets/addon/img/img_trafficLight_red.png");
 }
 
 void NvgWindow::updateState(const UIState &s) {
@@ -508,11 +511,15 @@ void NvgWindow::drawHud(QPainter &p, const cereal::ModelDataV2::Reader &model) {
   if (s->scene.longitudinalPlan.e2ex[12] > 30 && (s->scene.longitudinalPlan.stopline[12] < 10 || s->scene.longitudinalPlan.stopline[12] == 400)) { // && s->scene.car_state.getVEgo() > 0.5) {
       //ui_draw_image(s, { TRsign_x, TRsign_y, TRsign_w, TRsign_h }, "trafficLight_green", 0.8f);
       trafficLight = 1;
+      p.setOpacity(0.8);
+      p.drawPixmap(TRsign_x, TRsign_y, TRsign_w, TRsign_h, ic_trafficLight_green);
   }
   else if (s->scene.longitudinalPlan.e2ex[12] > 0 && s->scene.longitudinalPlan.e2ex[12] < 100 && s->scene.longitudinalPlan.stopline[12] < 100 && s->scene.longitudinalPlan.stopline[12] != 400) {
       //ui_draw_image(s, { TRsign_x, TRsign_y, TRsign_w, TRsign_h }, "trafficLight_red", 0.8f);
       //ui_draw_image(s, { 960 - 175 + 420, 540 - 150, 350, 350 }, "stopman", 0.8f);
       trafficLight = 2;
+      p.setOpacity(0.8);
+      p.drawPixmap(TRsign_x, TRsign_y, TRsign_w, TRsign_h, ic_trafficLight_red);
   }
 
   QString infoText;
