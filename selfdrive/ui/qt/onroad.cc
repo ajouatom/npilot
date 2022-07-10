@@ -370,7 +370,7 @@ void NvgWindow::drawLead(QPainter &painter, const cereal::ModelDataV2::LeadDataV
   painter.restore();
 }
 
-void NvgWindow::drawStopLine(QPainter& painter, const UIState* s, const cereal::ModelDataV2::StopLineData::Reader &stop_line_data, const line_vertices_data &vd) {
+void NvgWindow::drawStopLine(QPainter& painter, const UIState* s, const cereal::ModelDataV2::StopLineData::Reader &stop_line_data, const QPolygonF &vd) {
     painter.save();
 
     const UIScene& scene = s->scene;
@@ -497,7 +497,7 @@ void NvgWindow::drawHud(QPainter &p, const cereal::ModelDataV2::Reader &model) {
       auto stop_line = (*s->sm)["modelV2"].getModelV2().getStopLine();
       if (stop_line.getProb() > .5) {
           //ui_draw_stop_line(s, stop_line, s->scene.stop_line_vertices);
-          drawStopLine(p, s, stop_line, s->scene.stop_line_vertices);
+          //drawStopLine(p, s, stop_line, s->scene.stop_line_vertices);
       }
   }
 
