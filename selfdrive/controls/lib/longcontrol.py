@@ -123,7 +123,7 @@ class LongControl:
       error_deadzone = apply_deadzone(error, deadzone)
       output_accel = self.pid.update(error_deadzone, speed=CS.vEgo, feedforward=a_target, freeze_integrator=freeze_integrator)
 
-      if prevent_overshoot or CS.brakeHold:
+      if prevent_overshoot:# or CS.brakeHold:
         output_accel = min(output_accel, 0.0)
 
     # Intention is to stop, switch to a different brake control until we stop
