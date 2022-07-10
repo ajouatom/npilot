@@ -369,7 +369,7 @@ void NvgWindow::drawLead(QPainter &painter, const cereal::ModelDataV2::LeadDataV
 
   painter.restore();
 }
-
+/*
 void NvgWindow::drawStopLine(QPainter& painter, const UIState* s, const cereal::ModelDataV2::StopLineData::Reader &stop_line_data, const QPolygonF &vd) {
     painter.save();
 
@@ -379,7 +379,7 @@ void NvgWindow::drawStopLine(QPainter& painter, const UIState* s, const cereal::
 
     painter.restore();
 }
-
+*/
 
 void NvgWindow::paintGL() {
 }
