@@ -6,91 +6,12 @@
 #include <QSound>
 #include <QMouseEvent>
 
-#ifdef __APPLE__
-#include <OpenGL/gl3.h>
-#define NANOVG_GL3_IMPLEMENTATION
-#define nvgCreate nvgCreateGL3
-#else
-#include <GLES3/gl3.h>
-#define NANOVG_GLES3_IMPLEMENTATION
-#define nvgCreate nvgCreateGLES3
-#endif
-
-#define NANOVG_GLES3_IMPLEMENTATION
-#include <nanovg_gl.h>
-#include <nanovg_gl_utils.h>
-
 #include "common/timing.h"
 #include "selfdrive/ui/qt/util.h"
 #ifdef ENABLE_MAPS
 #include "selfdrive/ui/qt/maps/map.h"
 #include "selfdrive/ui/qt/maps/map_helpers.h"
 #endif
-void ui_nvg_init(UIState* s) {
-    // on EON, we enable MSAA
-    s->vg = nvgCreate(NVG_ANTIALIAS | NVG_STENCIL_STROKES | NVG_DEBUG);
-    assert(s->vg);
-
-    // init fonts
-    std::pair<const char*, const char*> fonts[] = {
-        {"sans-regular", "../assets/fonts/opensans_regular.ttf"},
-        {"sans-semibold", "../assets/fonts/opensans_semibold.ttf"},
-        {"sans-bold", "../assets/fonts/opensans_bold.ttf"},
-        {"KaiGenGothicKR-Normal", "../assets/addon/font/KaiGenGothicKR-Normal.ttf"},
-        {"KaiGenGothicKR-Medium", "../assets/addon/font/KaiGenGothicKR-Medium.ttf"},
-        {"KaiGenGothicKR-Bold", "../assets/addon/font/KaiGenGothicKR-Bold.ttf"},
-    };
-    for (auto [name, file] : fonts) {
-        int font_id = nvgCreateFont(s->vg, name, file);
-        assert(font_id >= 0);
-    }
-
-    // init images
-    std::vector<std::pair<const char*, const char*>> images = {
-      {"wheel", "../assets/img_chffr_wheel.png"},
-      {"center_wheel", "../assets/img_center_wheel.png"},
-      {"driver_face", "../assets/img_driver_face.png"},
-      {"driver_face_not", "../assets/img_driver_face_not.png"},
-      {"speed_S30", "../assets/addon/img/img_S30_speedahead.png"},
-      {"speed_bump", "../assets/addon/img/img_speed_bump.png"},
-      {"bus_only", "../assets/addon/img/img_bus_only.png"},
-      {"do_not_change_lane", "../assets/addon/img/do_not_change_lane.png"},
-      {"compass", "../assets/addon/img/img_compass.png"},
-      {"direction", "../assets/addon/img/img_direction.png"},
-      {"brake", "../assets/addon/img/img_brake_disc.png"},
-      {"accel", "../assets/addon/img/img_accel.png"},
-      {"scc", "../assets/addon/img/img_scc.png"},
-      {"scc_off", "../assets/addon/img/img_scc_off.png"},
-      {"autohold_warning", "../assets/addon/img/img_autohold_warning.png"},
-      {"autohold_active", "../assets/addon/img/img_autohold_active.png"},
-      {"lead_car_dist_0", "../assets/addon/img/car_dist_0.png"},
-      {"lead_car_dist_1", "../assets/addon/img/car_dist_1.png"},
-      {"lead_car_dist_2", "../assets/addon/img/car_dist_2.png"},
-      {"lead_car_dist_3", "../assets/addon/img/car_dist_3.png"},
-      {"lead_car_dist_4", "../assets/addon/img/car_dist_4.png"},
-      {"custom_lead_vision", "../assets/addon/img/custom_lead_vision.png"},
-      {"custom_lead_radar", "../assets/addon/img/custom_lead_radar.png"},
-      {"lead_radar", "../assets/addon/img/lead_radar.png"},
-      {"lead_under_radar", "../assets/addon/img/lead_underline_radar.png"},
-      {"lead_under_camera", "../assets/addon/img/lead_underline_camera.png"},
-      {"gear_P", "../assets/addon/img/gearP.png"},
-      {"gear_R", "../assets/addon/img/gearR.png"},
-      {"gear_N", "../assets/addon/img/gearN.png"},
-      {"gear_D", "../assets/addon/img/gearD.png"},
-      {"gear_X", "../assets/addon/img/gearX.png"},
-      {"gear_BG", "../assets/addon/img/gearBG.png"},
-      {"stopman", "../assets/addon/img/stopman.png"},
-      {"turn_signal_l", "../assets/addon/img/turn_signal_l.png"},
-      {"turn_signal_r", "../assets/addon/img/turn_signal_r.png"},
-      {"tire_pressure", "../assets/addon/img/img_tire_pressure.png"},
-      {"trafficLight_green", "../assets/addon/img/img_trafficLight_green.png"},
-      {"trafficLight_red", "../assets/addon/img/img_trafficLight_red.png"},
-    };
-    for (auto [name, file] : images) {
-        s->images[name] = nvgCreateImage(s->vg, file, 1);
-        assert(s->images[name] != 0);
-    }
-}
 
 OnroadWindow::OnroadWindow(QWidget *parent) : QWidget(parent) {
   QVBoxLayout *main_layout  = new QVBoxLayout(this);
@@ -342,8 +263,6 @@ void NvgWindow::initializeGL() {
   ic_turn_signal_l = QPixmap("../assets/images/turn_signal_l.png");
   ic_turn_signal_r = QPixmap("../assets/images/turn_signal_r.png");
   ic_satellite = QPixmap("../assets/images/satellite.png");
-
-  ui_nvg_init(&QUIState::ui_state);
 }
 
 void NvgWindow::updateState(const UIState &s) {
@@ -536,116 +455,6 @@ void NvgWindow::drawText2(QPainter &p, int x, int y, int flags, const QString &t
   p.setPen(color);
   p.drawText(QRect(x, y, rect.width()+1, rect.height()), flags, text);
 }
-void ui_nvg_init(UIState* s) {
-    // on EON, we enable MSAA
-    s->vg = Hardware::EON() ? nvgCreate(0) : nvgCreate(NVG_ANTIALIAS | NVG_STENCIL_STROKES | NVG_DEBUG);
-    assert(s->vg);
-
-    // init fonts
-    std::pair<const char*, const char*> fonts[] = {
-        {"sans-regular", "../assets/fonts/opensans_regular.ttf"},
-        {"sans-semibold", "../assets/fonts/opensans_semibold.ttf"},
-        {"sans-bold", "../assets/fonts/opensans_bold.ttf"},
-        {"KaiGenGothicKR-Normal", "../assets/addon/font/KaiGenGothicKR-Normal.ttf"},
-        {"KaiGenGothicKR-Medium", "../assets/addon/font/KaiGenGothicKR-Medium.ttf"},
-        {"KaiGenGothicKR-Bold", "../assets/addon/font/KaiGenGothicKR-Bold.ttf"},
-    };
-    for (auto [name, file] : fonts) {
-        int font_id = nvgCreateFont(s->vg, name, file);
-        assert(font_id >= 0);
-    }
-
-    // init images
-    std::vector<std::pair<const char*, const char*>> images = {
-      {"wheel", "../assets/img_chffr_wheel.png"},
-      {"center_wheel", "../assets/img_center_wheel.png"},
-      {"driver_face", "../assets/img_driver_face.png"},
-      {"driver_face_not", "../assets/img_driver_face_not.png"},
-      {"speed_S30", "../assets/addon/img/img_S30_speedahead.png"},
-      {"speed_bump", "../assets/addon/img/img_speed_bump.png"},
-      {"bus_only", "../assets/addon/img/img_bus_only.png"},
-      {"do_not_change_lane", "../assets/addon/img/do_not_change_lane.png"},
-      {"compass", "../assets/addon/img/img_compass.png"},
-      {"direction", "../assets/addon/img/img_direction.png"},
-      {"brake", "../assets/addon/img/img_brake_disc.png"},
-      {"accel", "../assets/addon/img/img_accel.png"},
-      {"scc", "../assets/addon/img/img_scc.png"},
-      {"scc_off", "../assets/addon/img/img_scc_off.png"},
-      {"autohold_warning", "../assets/addon/img/img_autohold_warning.png"},
-      {"autohold_active", "../assets/addon/img/img_autohold_active.png"},
-      {"lead_car_dist_0", "../assets/addon/img/car_dist_0.png"},
-      {"lead_car_dist_1", "../assets/addon/img/car_dist_1.png"},
-      {"lead_car_dist_2", "../assets/addon/img/car_dist_2.png"},
-      {"lead_car_dist_3", "../assets/addon/img/car_dist_3.png"},
-      {"lead_car_dist_4", "../assets/addon/img/car_dist_4.png"},
-      {"custom_lead_vision", "../assets/addon/img/custom_lead_vision.png"},
-      {"custom_lead_radar", "../assets/addon/img/custom_lead_radar.png"},
-      {"lead_radar", "../assets/addon/img/lead_radar.png"},
-      {"lead_under_radar", "../assets/addon/img/lead_underline_radar.png"},
-      {"lead_under_camera", "../assets/addon/img/lead_underline_camera.png"},
-      {"gear_P", "../assets/addon/img/gearP.png"},
-      {"gear_R", "../assets/addon/img/gearR.png"},
-      {"gear_N", "../assets/addon/img/gearN.png"},
-      {"gear_D", "../assets/addon/img/gearD.png"},
-      {"gear_X", "../assets/addon/img/gearX.png"},
-      {"gear_BG", "../assets/addon/img/gearBG.png"},
-      {"stopman", "../assets/addon/img/stopman.png"},
-      {"turn_signal_l", "../assets/addon/img/turn_signal_l.png"},
-      {"turn_signal_r", "../assets/addon/img/turn_signal_r.png"},
-      {"tire_pressure", "../assets/addon/img/img_tire_pressure.png"},
-      {"trafficLight_green", "../assets/addon/img/img_trafficLight_green.png"},
-      {"trafficLight_red", "../assets/addon/img/img_trafficLight_red.png"},
-    };
-    for (auto [name, file] : images) {
-        s->images[name] = nvgCreateImage(s->vg, file, 1);
-        assert(s->images[name] != 0);
-    }
-}
-
-static void ui_draw_line(UIState* s, const line_vertices_data& vd, NVGcolor* color, NVGpaint* paint) {
-    if (vd.cnt == 0) return;
-
-    const vertex_data* v = &vd.v[0];
-    nvgBeginPath(s->vg);
-    nvgMoveTo(s->vg, v[0].x, v[0].y);
-    for (int i = 1; i < vd.cnt; i++) {
-        nvgLineTo(s->vg, v[i].x, v[i].y);
-    }
-    nvgClosePath(s->vg);
-    if (color) {
-        nvgFillColor(s->vg, *color);
-    }
-    else if (paint) {
-        nvgFillPaint(s->vg, *paint);
-    }
-    nvgFill(s->vg);
-}
-void ui_draw_image(const UIState* s, const Rect& r, const char* name, float alpha) {
-    nvgBeginPath(s->vg);
-    NVGpaint imgPaint = nvgImagePattern(s->vg, r.x, r.y, r.w, r.h, 0, s->images.at(name), alpha);
-    nvgRect(s->vg, r.x, r.y, r.w, r.h);
-    nvgFillPaint(s->vg, imgPaint);
-    nvgFill(s->vg);
-}
-
-static void ui_draw_stop_line(UIState* s, const cereal::ModelDataV2::StopLineData::Reader& stop_line_data, const line_vertices_data& vd) {
-    NVGcolor color = nvgRGBAf(0.7, 0.0, 0.0, stop_line_data.getProb());
-    ui_draw_line(s, vd, &color, nullptr);
-}
-static void ui_draw_stop_sign(UIState* s) {
-    int TRsign_w = 250;
-    int TRsign_h = 140;
-    int TRsign_x = 960 + 40 + TRsign_w;
-    int TRsign_y = 50;
-
-    if (s->scene.longitudinalPlan.e2ex[12] > 30 && (s->scene.longitudinalPlan.stopline[12] < 10 || s->scene.longitudinalPlan.stopline[12] == 400)) { // && s->scene.car_state.getVEgo() > 0.5) {
-        ui_draw_image(s, { TRsign_x, TRsign_y, TRsign_w, TRsign_h }, "trafficLight_green", 0.8f);
-    }
-    else if (s->scene.longitudinalPlan.e2ex[12] > 0 && s->scene.longitudinalPlan.e2ex[12] < 100 && s->scene.longitudinalPlan.stopline[12] < 100 && s->scene.longitudinalPlan.stopline[12] != 400) {
-        ui_draw_image(s, { TRsign_x, TRsign_y, TRsign_w, TRsign_h }, "trafficLight_red", 0.8f);
-        ui_draw_image(s, { 960 - 175 + 420, 540 - 150, 350, 350 }, "stopman", 0.8f);
-    }
-}
 
 void NvgWindow::drawHud(QPainter &p, const cereal::ModelDataV2::Reader &model) {
 
@@ -683,11 +492,10 @@ void NvgWindow::drawHud(QPainter &p, const cereal::ModelDataV2::Reader &model) {
   if (s->scene.longitudinalPlan.stopline[12] > 3.0) {
       auto stop_line = (*s->sm)["modelV2"].getModelV2().getStopLine();
       if (stop_line.getProb() > .5) {
-          ui_draw_stop_line(s, stop_line, s->scene.stop_line_vertices);
+          //ui_draw_stop_line(s, stop_line, s->scene.stop_line_vertices);
           //drawStopLine(p, s, stop_line, s->scene.stop_line_vertices);
       }
   }
-  ui_draw_stop_sign(s);
 
   if(s->show_debug && width() > 1200)
     drawDebugText(p);
