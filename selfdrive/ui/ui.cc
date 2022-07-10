@@ -233,6 +233,10 @@ void UIState::updateStatus() {
     }
     started_prev = scene.started;
     emit offroadTransition(!scene.started);
+  } else if (sm->frame == 1) {
+    emit offroadTransition(!scene.started);
+  } else  if (sm->frame % (10*UI_FREQ) == 0) {
+      scene.IsOpenpilotViewEnabled = Params().getBool("IsOpenpilotViewEnabled");
   }
 }
 
