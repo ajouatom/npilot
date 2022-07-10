@@ -7,4 +7,4 @@ export PYTHONPATH=/data/openpilot
 
 cd /data/openpilot
 /usr/bin/git reset --keep HEAD@{1}
-reboot
+sudo reboot
