@@ -6,6 +6,20 @@
 #include <QSound>
 #include <QMouseEvent>
 
+#ifdef __APPLE__
+#include <OpenGL/gl3.h>
+#define NANOVG_GL3_IMPLEMENTATION
+#define nvgCreate nvgCreateGL3
+#else
+#include <GLES3/gl3.h>
+#define NANOVG_GLES3_IMPLEMENTATION
+#define nvgCreate nvgCreateGLES3
+#endif
+
+#define NANOVG_GLES3_IMPLEMENTATION
+#include <nanovg_gl.h>
+#include <nanovg_gl_utils.h>
+
 #include "common/timing.h"
 #include "selfdrive/ui/qt/util.h"
 #ifdef ENABLE_MAPS
@@ -14,7 +28,7 @@
 #endif
 void ui_nvg_init(UIState* s) {
     // on EON, we enable MSAA
-    s->vg = Hardware::EON() ? nvgCreate(0) : nvgCreate(NVG_ANTIALIAS | NVG_STENCIL_STROKES | NVG_DEBUG);
+    s->vg = nvgCreate(NVG_ANTIALIAS | NVG_STENCIL_STROKES | NVG_DEBUG);
     assert(s->vg);
 
     // init fonts
