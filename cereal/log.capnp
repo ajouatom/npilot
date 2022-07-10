@@ -884,12 +884,12 @@ struct LongitudinalPlan @0xe00b5b3eba12876c {
 
   solverExecutionTime @35 :Float32;
 
-  e2eX @38 :List(Float64) = [0.];
-  lead0Obstacle @39 :List(Float64) = [0.];
-  lead1Obstacle @40 :List(Float64) = [0.];
-  cruiseTarget @41 :List(Float64) = [0.];
-  stopLine @42 :List(Float64) = [0.];
-  stoplineProb @43 :Float32;
+  e2eX @36 :List(Float64) = [0.];
+  lead0Obstacle @37 :List(Float64) = [0.];
+  lead1Obstacle @38 :List(Float64) = [0.];
+  cruiseTarget @39 :List(Float64) = [0.];
+  stopLine @40 :List(Float64) = [0.];
+  stoplineProb @41 :Float32;
   enum LongitudinalPlanSource {
     lead0 @0;
     lead1 @1;
