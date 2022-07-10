@@ -69,6 +69,8 @@ OnroadWindow::OnroadWindow(QWidget *parent) : QWidget(parent) {
 
 void OnroadWindow::updateState(const UIState &s) {
   QColor bgColor = bg_colors[s.status];
+  if( s.scene.IsOpenpilotViewEnabled ) {}
+  else {
   Alert alert = Alert::get(*(s.sm), s.scene.started_frame);
   if (s.sm->updated("controlsState") || !alert.equal({})) {
     if (alert.type == "controlsUnresponsive") {
@@ -77,6 +79,7 @@ void OnroadWindow::updateState(const UIState &s) {
       bgColor = bg_colors[STATUS_DISENGAGED];
     }
     alerts->updateAlert(alert, bgColor);
+  }
   }
 
   nvg->updateState(s);
