@@ -10,7 +10,7 @@ from decimal import Decimal
 LongCtrlState = car.CarControl.Actuators.LongControlState
 
 # As per ISO 15622:2018 for all speeds
-ACCEL_MIN_ISO = -3.5  # m/s^2
+ACCEL_MIN_ISO = -4.0  # m/s^2
 ACCEL_MAX_ISO = 2.0  # m/s^2
 
 
@@ -123,7 +123,7 @@ class LongControl:
       error_deadzone = apply_deadzone(error, deadzone)
       output_accel = self.pid.update(error_deadzone, speed=CS.vEgo, feedforward=a_target, freeze_integrator=freeze_integrator)
 
-      if prevent_overshoot:
+      if prevent_overshoot or CS.brakeHold:
         output_accel = min(output_accel, 0.0)
 
     # Intention is to stop, switch to a different brake control until we stop

@@ -1313,6 +1313,18 @@ void NvgWindow::drawDebugText(QPainter &p) {
   str1 += show_road_name ? QString::fromStdString(lmd.getCurrentRoadName()) : "";
   y += height;
   p.drawText(text_x, y, str1);
+
+  bool speedLimitValid = lmd.getSpeedLimitValid();
+  float speedLimit = lmd.getSpeedLimit();
+  bool turnSpeedValid = lmd.getTurnSpeedLimitValid();
+  float turnSpeedLimit = lmd.getTurnSpeedLimit();
+  str.sprintf("SpeedLimit(%d): %.1f", speedLimitValid, speedLimit);
+  y += height;
+  p.drawText(text_x, y, str);
+  str.sprintf("TurnSpeed(%d): %.1f", turnSpeedValid, turnSpeedLimit);
+  y += height;
+  p.drawText(text_x, y, str);
+
 #endif
 
   p.restore();
