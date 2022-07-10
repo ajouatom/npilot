@@ -21,7 +21,7 @@ LONG_MPC_DIR = os.path.dirname(os.path.abspath(__file__))
 EXPORT_DIR = os.path.join(LONG_MPC_DIR, "c_generated_code")
 JSON_FILE = os.path.join(LONG_MPC_DIR, "acados_ocp_long.json")
 
-SOURCES = ['lead0', 'lead1', 'cruise']
+SOURCES = ['lead0', 'lead1', 'cruise', 'stop']
 
 X_DIM = 3
 U_DIM = 1
@@ -35,7 +35,7 @@ X_EGO_COST = 0.
 V_EGO_COST = 0.
 A_EGO_COST = 0.
 J_EGO_COST = 5.0
-A_CHANGE_COST = 200.
+A_CHANGE_COST = 150.
 DANGER_ZONE_COST = 100.
 DANGER_ZONE_COST_E2E = 10.
 CRASH_DISTANCE = .5
@@ -211,6 +211,18 @@ class LongitudinalMpc:
     self.reset()
     self.source = SOURCES[2]
 
+    self.stop_line = True #Params().get_bool("ShowStopLine")
+
+    self.lo_timer = 0 
+
+    self.lead_0_obstacle = np.zeros(13, dtype=np.float64)
+    self.lead_1_obstacle = np.zeros(13, dtype=np.float64)
+    self.e2e_x = np.zeros(13, dtype=np.float64)
+    self.cruise_target = np.zeros(13, dtype=np.float64)
+    self.stopline = np.zeros(13, dtype=np.float64)
+    self.stop_prob = 0.0
+
+    self.on_stopping = False
   def reset(self):
     # self.solver = AcadosOcpSolverCython(MODEL_NAME, ACADOS_SOLVER_TYPE, N)
     self.solver.reset()
@@ -251,12 +263,8 @@ class LongitudinalMpc:
       self.set_weights_for_lead_policy(prev_accel_constraint)
 
   def set_weights_for_lead_policy(self, prev_accel_constraint=True):
-    if self.e2eMode:
-      a_change_cost = .1 if prev_accel_constraint else 0
-      W = np.diag([0., .2, .25, 1., 0.0, 1.])
-    else:
-      a_change_cost = A_CHANGE_COST if prev_accel_constraint else 0
-      W = np.asfortranarray(np.diag([X_EGO_OBSTACLE_COST, X_EGO_COST, V_EGO_COST, A_EGO_COST, a_change_cost, J_EGO_COST]))
+    a_change_cost = A_CHANGE_COST if prev_accel_constraint else 0
+    W = np.asfortranarray(np.diag([X_EGO_OBSTACLE_COST, X_EGO_COST, V_EGO_COST, A_EGO_COST, a_change_cost, J_EGO_COST]))
     for i in range(N):
       # reduce the cost on (a-a_prev) later in the horizon.
       W[4,4] = a_change_cost * np.interp(T_IDXS[i], [0.0, 1.0, 2.0], [1.0, 1.0, 0.0])
@@ -266,18 +274,12 @@ class LongitudinalMpc:
     self.solver.cost_set(N, 'W', np.copy(W[:COST_E_DIM, :COST_E_DIM]))
 
     # Set L2 slack cost on lower bound constraints
-    if self.e2eMode:
-      Zl = np.array([LIMIT_COST, LIMIT_COST, LIMIT_COST, DANGER_ZONE_COST_E2E])
-    else:
-      Zl = np.array([LIMIT_COST, LIMIT_COST, LIMIT_COST, DANGER_ZONE_COST])
+    Zl = np.array([LIMIT_COST, LIMIT_COST, LIMIT_COST, DANGER_ZONE_COST])
     for i in range(N):
       self.solver.cost_set(i, 'Zl', Zl)
 
   def set_weights_for_xva_policy(self):
-    if self.e2eMode:
-      W = np.diag([0., 0., .0, 1., 0.0, 1.])
-    else:
-      W = np.asfortranarray(np.diag([0., 0.2, 0.25, 1., 0.0, .1]))
+    W = np.asfortranarray(np.diag([0., 0.2, 0.25, 1., 0.0, .1]))
     for i in range(N):
       self.solver.cost_set(i, 'W', W)
     # Setting the slice without the copy make the array not contiguous,
@@ -332,27 +334,32 @@ class LongitudinalMpc:
     self.cruise_min_a = min_a
     self.cruise_max_a = max_a
 
-  def update(self, carstate, radarstate, v_cruise, x, v, a):
-    if self.e2eMode:
-      xforward = ((v[1:] + v[:-1]) / 2) * (T_IDXS[1:] - T_IDXS[:-1])
-      x = np.cumsum(np.insert(xforward, 0, x[0]))
-      self.yref[:,1] = x
-      self.yref[:,2] = v
-      self.yref[:,3] = a
-    else:
-      v_ego = self.x0[1]
+  def update(self, carstate, radarstate, model, v_cruise, x, v, a):
+    self.v_ego = carstate.vEgo
+    v_ego = self.x0[1]
+    stopping = model.stopLine.prob > 0.5 if self.stop_line else False
+
+    # opkr
+    self.lo_timer += 1
+    if self.lo_timer > 200:
+      self.lo_timer = 0
+      #self.e2e = Params().get_bool("E2ELong")
+
+    self.e2e = self.e2eMode
+    
+    xforward = ((v[1:] + v[:-1]) / 2) * (T_IDXS[1:] - T_IDXS[:-1])
+    x = np.cumsum(np.insert(xforward, 0, x[0]))
+    self.yref[:,1] = x
+    self.yref[:,2] = v
+    self.yref[:,3] = a
     self.status = radarstate.leadOne.status or radarstate.leadTwo.status
 
     lead_xv_0 = self.process_lead(radarstate.leadOne)
     lead_xv_1 = self.process_lead(radarstate.leadTwo)
 
     # set accel limits in params
-    if self.e2eMode:
-      self.params[:,0] = self.cruise_min_a
-      self.params[:,1] = self.cruise_max_a
-    else:
-      self.params[:,0] = interp(float(self.status), [0.0, 1.0], [self.cruise_min_a, MIN_ACCEL])
-      self.params[:,1] = self.cruise_max_a
+    self.params[:,0] = interp(float(self.status), [0.0, 1.0], [self.cruise_min_a, MIN_ACCEL])
+    self.params[:,1] = self.cruise_max_a
 
     # neokii
     cruise_gap = int(clip(carstate.cruiseGap, 1., 4.))
@@ -369,36 +376,47 @@ class LongitudinalMpc:
     lead_0_obstacle = lead_xv_0[:,0] + get_stopped_equivalence_factor(lead_xv_0[:,1])
     lead_1_obstacle = lead_xv_1[:,0] + get_stopped_equivalence_factor(lead_xv_1[:,1])
 
-    if self.e2eMode:
-      cruise_target = T_IDXS * v_cruise + x[0]
-      x_targets = np.column_stack([x,
-                                  lead_0_obstacle - (3/4) * get_safe_obstacle_distance(v, tr),
-                                  lead_1_obstacle - (3/4) * get_safe_obstacle_distance(v, tr),
-                                  cruise_target])
-      #self.source = SOURCES[np.argmin(x_obstacles[0])]
-      self.params[:,2] = 1e3
-      self.params[:,3] = np.copy(self.prev_a)
+    v_lower = v_ego + (T_IDXS * self.cruise_min_a * 1.05)
+    v_upper = v_ego + (T_IDXS * self.cruise_max_a * 1.05)
+    v_cruise_clipped = np.clip(v_cruise * np.ones(N+1),
+                               v_lower,
+                               v_upper)
+    cruise_obstacle = np.cumsum(T_DIFFS * v_cruise_clipped) + get_safe_obstacle_distance(v_cruise_clipped, tr)
 
-      self.yref[:,1] = np.min(x_targets, axis=1)
+    stopline = (model.stopLine.x + 6.0) * np.ones(N+1) if stopping else 400 * np.ones(N+1)
+    x = (x[N] + 6.0) * np.ones(N+1)
+
+    if self.status and not self.on_stopping:
+      x_obstacles = np.column_stack([lead_0_obstacle, lead_1_obstacle, cruise_obstacle])
+    elif x[N] > 30 and stopline[N] < 30 and self.v_ego < 6.0:
+      self.on_stopping = False
+      x_obstacles = np.column_stack([lead_0_obstacle, lead_1_obstacle, cruise_obstacle, x])
+    elif x[N] < 100 and stopline[N] < 100:
+      self.on_stopping = True
+      x_obstacles = np.column_stack([lead_0_obstacle, lead_1_obstacle, cruise_obstacle*2, (stopline*0.2)+(x*0.8)])
+    elif x[N] < 100 and self.on_stopping:
+      x_obstacles = np.column_stack([lead_0_obstacle, lead_1_obstacle, cruise_obstacle*2, x])
+    else:
+      self.on_stopping = False
+      x_obstacles = np.column_stack([lead_0_obstacle, lead_1_obstacle, cruise_obstacle])
+
+    self.source = SOURCES[np.argmin(x_obstacles[N])]
+    self.params[:,2] = np.min(x_obstacles, axis=1)
+    self.params[:,3] = np.copy(self.prev_a)
+    self.params[:,4] = self.param_tr
+
+    self.e2e_x = x[:]
+    self.lead_0_obstacle = lead_0_obstacle[:]
+    self.lead_1_obstacle = lead_1_obstacle[:]
+    self.cruise_target = cruise_obstacle[:]
+    self.stopline = stopline[:]
+    self.stop_prob = model.stopLine.prob
+
+    if self.e2e:
+      self.yref[:,1] = np.min(x_obstacles, axis=1)
       for i in range(N):
         self.solver.set(i, "yref", self.yref[i])
       self.solver.set(N, "yref", self.yref[N][:COST_E_DIM])
-    else:
-      # Fake an obstacle for cruise, this ensures smooth acceleration to set speed
-      # when the leads are no factor.
-      v_lower = v_ego + (T_IDXS * self.cruise_min_a * 1.05)
-      v_upper = v_ego + (T_IDXS * self.cruise_max_a * 1.05)
-      v_cruise_clipped = np.clip(v_cruise * np.ones(N+1),
-                                 v_lower,
-                                 v_upper)
-      cruise_obstacle = np.cumsum(T_DIFFS * v_cruise_clipped) + get_safe_obstacle_distance(v_cruise_clipped, tr)
-
-      x_obstacles = np.column_stack([lead_0_obstacle, lead_1_obstacle, cruise_obstacle])
-      self.source = SOURCES[np.argmin(x_obstacles[0])]
-      self.params[:,2] = np.min(x_obstacles, axis=1)
-      self.params[:,3] = np.copy(self.prev_a)
-
-    self.params[:,4] = self.param_tr
 
     self.run()
     if (np.any(lead_xv_0[:,0] - self.x_sol[:,0] < CRASH_DISTANCE) and
