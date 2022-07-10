@@ -6,5 +6,5 @@ export PATH=/usr/local/bin:/data/data/com.termux/files/usr/bin:/data/data/com.te
 export PYTHONPATH=/data/openpilot
 
 cd /data/openpilot
-/data/data/com.termux/files/usr/bin/git reset --keep HEAD@{1}
+/usr/bin/git reset --keep HEAD@{1}
 reboot

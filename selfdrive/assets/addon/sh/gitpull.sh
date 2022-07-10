@@ -8,9 +8,9 @@ export PYTHONPATH=/data/openpilot
 cd /data/openpilot
 BRANCH=$(git rev-parse --abbrev-ref HEAD)
 HASH=$(git rev-parse HEAD)
-/data/data/com.termux/files/usr/bin/git fetch
+/usr/bin/git fetch
 REMOTE_HASH=$(git rev-parse --verify origin/$BRANCH)
-/data/data/com.termux/files/usr/bin/git pull
+/usr/bin/git pull
 
 
 if [ "$HASH" != "$REMOTE_HASH" ]; then
