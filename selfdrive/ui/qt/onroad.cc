@@ -508,6 +508,10 @@ void NvgWindow::drawHud(QPainter &p, const cereal::ModelDataV2::Reader &model) {
   const auto live_params = sm["liveParameters"].getLiveParameters();
 
   int trafficLight = 0;
+  int TRsign_w = 250;
+  int TRsign_h = 140;
+  int TRsign_x = 960 + 40 + TRsign_w;
+  int TRsign_y = 50;
   if (s->scene.longitudinalPlan.e2ex[12] > 30 && (s->scene.longitudinalPlan.stopline[12] < 10 || s->scene.longitudinalPlan.stopline[12] == 400)) { // && s->scene.car_state.getVEgo() > 0.5) {
       //ui_draw_image(s, { TRsign_x, TRsign_y, TRsign_w, TRsign_h }, "trafficLight_green", 0.8f);
       trafficLight = 1;
