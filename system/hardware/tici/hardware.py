@@ -238,6 +238,7 @@ class Tici(HardwareBase):
     return network_strength
 
   def get_network_metered(self, network_type) -> bool:
+    print("get_network_metered")
     try:
       primary_connection = self.nm.Get(NM, 'PrimaryConnection', dbus_interface=DBUS_PROPS, timeout=TIMEOUT)
       primary_connection = self.bus.get_object(NM, primary_connection)
@@ -248,14 +249,18 @@ class Tici(HardwareBase):
         metered_prop = dev_obj.Get(NM_DEV, 'Metered', dbus_interface=DBUS_PROPS, timeout=TIMEOUT)
 
         if network_type == NetworkType.wifi:
+          print("get_network_metered True1")
           if metered_prop in [NMMetered.NM_METERED_YES, NMMetered.NM_METERED_GUESS_YES]:
+            print("get_network_metered True")
             return True
         elif network_type in [NetworkType.cell2G, NetworkType.cell3G, NetworkType.cell4G, NetworkType.cell5G]:
+          print("get_network_metered False")
           if metered_prop == NMMetered.NM_METERED_NO:
+            print("get_network_metered False2")
             return False
     except Exception:
       pass
-
+    print("get_network_metered ttt")
     return super().get_network_metered(network_type)
 
   @staticmethod
