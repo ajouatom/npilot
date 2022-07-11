@@ -33,9 +33,10 @@ int main(int argc, char *argv[]) {
 
   QPushButton *btn = new QPushButton();
 #ifdef __aarch64__
-  btn->setText(QObject::tr("Reboot"));
+  btn->setText("Git Pull");
   QObject::connect(btn, &QPushButton::clicked, [=]() {
-    Hardware::reboot();
+    QProcess::execute("/data/openpilot/selfdrive/assets/addon/sh/gitpull.sh");
+    //Hardware::reboot();
   });
 #else
   btn->setText(QObject::tr("Exit"));
