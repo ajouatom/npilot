@@ -258,6 +258,7 @@ class CruiseHelper:
             self.v_cruise_kph_current = controls.v_cruise_kph
           # 60km/h 이하.. 직선도로 곡선 5M이내, 150M이내 정지선, 자동E2E모드 전환.
           elif v_ego_kph <= 60.0 and self.position_x < 150.0: # and abs(self.position_y) < 3.0:
+            controls.v_cruise_kph = 40.0
             self.cruise_resume(controls, CS)
             self.activate_E2E = True
           # 40km/h이상, 전방에 레이더가 잡히지 않으면, 운전자가 너무빠르다고 판단.. 브레이크를 밟았을것이라고 판단....브레이크를 떼는 순간의 속도로 유지...
