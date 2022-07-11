@@ -50,7 +50,6 @@ AUTO_TR_BP = [0., 10.*CV.KPH_TO_MS, 70.*CV.KPH_TO_MS, 110.*CV.KPH_TO_MS]
 AUTO_TR_V = [0.8, 1.0, 1.2, 1.35]
 
 AUTO_TR_CRUISE_GAP = 4
-DIFF_RADAR_VISION = 1.0
 
 
 # Fewer timestamps don't hurt performance and lead to
@@ -263,8 +262,12 @@ class LongitudinalMpc:
       self.set_weights_for_lead_policy(prev_accel_constraint)
 
   def set_weights_for_lead_policy(self, prev_accel_constraint=True):
-    a_change_cost = A_CHANGE_COST if prev_accel_constraint else 0
-    W = np.asfortranarray(np.diag([X_EGO_OBSTACLE_COST, X_EGO_COST, V_EGO_COST, A_EGO_COST, a_change_cost, J_EGO_COST]))
+    if self.e2eMode:
+      a_change_cost = .1 if prev_accel_constraint else 0
+      W = np.diag([0., .2, .25, 1., 0.0, 1.])
+    else:
+      a_change_cost = A_CHANGE_COST if prev_accel_constraint else 0
+      W = np.asfortranarray(np.diag([X_EGO_OBSTACLE_COST, X_EGO_COST, V_EGO_COST, A_EGO_COST, a_change_cost, J_EGO_COST]))
     for i in range(N):
       # reduce the cost on (a-a_prev) later in the horizon.
       W[4,4] = a_change_cost * np.interp(T_IDXS[i], [0.0, 1.0, 2.0], [1.0, 1.0, 0.0])
@@ -274,7 +277,7 @@ class LongitudinalMpc:
     self.solver.cost_set(N, 'W', np.copy(W[:COST_E_DIM, :COST_E_DIM]))
 
     # Set L2 slack cost on lower bound constraints
-    Zl = np.array([LIMIT_COST, LIMIT_COST, LIMIT_COST, DANGER_ZONE_COST])
+    Zl = np.array([LIMIT_COST, LIMIT_COST, LIMIT_COST, DANGER_ZONE_COST_E2E if self.e2eMode else DANGER_ZONE_COST])
     for i in range(N):
       self.solver.cost_set(i, 'Zl', Zl)
 
@@ -310,7 +313,7 @@ class LongitudinalMpc:
   def process_lead(self, lead):
     v_ego = self.x0[1]
     if lead is not None and lead.status:
-      x_lead = lead.dRel if lead.radar else max(lead.dRel - DIFF_RADAR_VISION, 0.)
+      x_lead = lead.dRel
       v_lead = lead.vLead
       a_lead = lead.aLeadK
       a_lead_tau = lead.aLeadTau
@@ -383,8 +386,8 @@ class LongitudinalMpc:
                                v_upper)
     cruise_obstacle = np.cumsum(T_DIFFS * v_cruise_clipped) + get_safe_obstacle_distance(v_cruise_clipped, tr)
 
-    stopline = (model.stopLine.x + 6.0) * np.ones(N+1) if stopping else 400 * np.ones(N+1)
-    x = (x[N] + 6.0) * np.ones(N+1)
+    stopline = (model.stopLine.x + 7.5) * np.ones(N+1) if stopping else 400 * np.ones(N+1)
+    x = (x[N] + 7.5) * np.ones(N+1)
 
     if self.status and not self.on_stopping:
       x_obstacles = np.column_stack([lead_0_obstacle, lead_1_obstacle, cruise_obstacle])
