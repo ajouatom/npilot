@@ -376,7 +376,7 @@ void NvgWindow::drawLead(QPainter &painter, const cereal::ModelDataV2::LeadDataV
 void NvgWindow::drawStopLine(QPainter& painter, const UIState* s, const cereal::ModelDataV2::StopLineData::Reader &stop_line_data, const line_vertices_data &vd) {
     painter.save();
 
-    const UIScene& scene = s->scene;
+    //const UIScene& scene = s->scene;
     painter.setBrush(QColor::fromRgbF(0.7, 0.0, 0.0, std::clamp<float>(stop_line_data.getProb(), 0.0, 0.7)));
 
     const vertex_data* v = &vd.v[0];
