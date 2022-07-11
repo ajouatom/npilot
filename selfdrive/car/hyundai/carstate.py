@@ -256,10 +256,6 @@ class CarState(CarStateBase):
       ("CF_Mdps_ToiUnavail", "MDPS12"),
       ("CF_Mdps_ToiFlt", "MDPS12"),
       ("CR_Mdps_OutTq", "MDPS12"),
-      ("Navi_SCC_Curve_Status", "SCC11"),
-      ("Navi_SCC_Curve_Act", "SCC11"),
-      ("Navi_SCC_Camera_Act", "SCC11"),
-      ("Navi_SCC_Camera_Status", "SCC11"),
 
       ("SAS_Angle", "SAS11"),
       ("SAS_Speed", "SAS11"),
@@ -281,8 +277,7 @@ class CarState(CarStateBase):
       ("CGW4", 5),
       ("WHL_SPD11", 50),
       ("SAS11", 100),
-      ("TPMS11", 5),
-      ("SCC11", 50),
+      ("TPMS11", 5),      
     ]
 
     if not CP.openpilotLongitudinalControl:
