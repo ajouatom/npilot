@@ -400,12 +400,14 @@ class CarInterface(CarInterfaceBase):
       # Handle CF_Clu_CruiseSwState changing buttons mid-press
       if self.CS.cruise_buttons[-1] != 0 and self.CS.prev_cruise_buttons != 0:
         buttonEvents.append(create_button_event(0, self.CS.prev_cruise_buttons, BUTTONS_DICT))
+      ret.buttonEvents = buttonEvents
+      events.events.extend(create_button_enable_events(ret.buttonEvents))
+
+      if self.CS.cruise_buttons[-1] != 0:
         # ajouatom
         if self.CS.cruise_buttons[-1] == Buttons.GAP_DIST:
           self.cruiseGap = 1 if self.cruiseGap == 4 else self.cruiseGap + 1
           print("cruiseGap={}", self.cruiseGap )
-      ret.buttonEvents = buttonEvents
-      events.events.extend(create_button_enable_events(ret.buttonEvents))
 
     if not self.CS.CP.openpilotLongitudinalControl:
       self.cruiseGap = ret.cruiseState.cruiseGap # ajouatom: carstate���� �о��..
