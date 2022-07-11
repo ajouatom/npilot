@@ -381,7 +381,7 @@ void NvgWindow::drawStopLine(QPainter& painter, const UIState* s, const cereal::
     //painter.setBrush(QColor(255, 0, 0, 255));
     const vertex_data* v = &vd.v[0];
     QPointF tt[] = { {v[0].x, v[0].y}, {v[1].x, v[1].y}};
-    painter.setBrush(redColor(std::clamp<float>(stop_line_data.getProb()));
+    painter.setBrush(redColor(200));
     painter.drawPolygon(tt, std::size(tt));
     //for (int i = 0; i < vd.cnt-1; i++) {
     //    painter.drawLine(v[i].x, v[i].y, v[i+1].x, v[i+1].y);
