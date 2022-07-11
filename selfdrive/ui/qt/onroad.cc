@@ -499,7 +499,8 @@ void NvgWindow::drawHud(QPainter &p, const cereal::ModelDataV2::Reader &model) {
       auto stop_line = (*s->sm)["modelV2"].getModelV2().getStopLine();
       if (stop_line.getProb() > .5) {
           //ui_draw_stop_line(s, stop_line, s->scene.stop_line_vertices);
-          //drawStopLine(p, s, stop_line, s->scene.stop_line_vertices);
+          drawStopLine(p, s, stop_line, s->scene.stop_line_vertices);
+          printf("draw stop lines...\n");
       }
   }
 
