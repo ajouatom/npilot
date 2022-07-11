@@ -57,6 +57,7 @@ def manager_init() -> None:
     ("AutoResumeFromBrakeReleaseDist", "10"),
     ("AutoResumeFromBrakeReleaseLeadCar", "1"),
     ("IsOpenpilotViewEnabled", "0"),
+    ("RoadList", "RoadName1,+0.0,RoadName2,-0.0\nRoadName3,30,RoadName4,60"),
     ("StoppingDist", "35"),
   ]
   if not PC:
