@@ -205,6 +205,7 @@ class MapD():
     horizon_mts = self.gps_speed * LOOK_AHEAD_HORIZON_TIME
     next_turn_speed_limit_sections = self.route.next_curvature_speed_limit_sections(horizon_mts)
     current_road_name = self.route.current_road_name
+    ref = self.route.current_ref_num
 
     map_data_msg = messaging.new_message('liveMapData')
     map_data_msg.valid = sm.all_alive(service_list=['gpsLocationExternal']) and \
