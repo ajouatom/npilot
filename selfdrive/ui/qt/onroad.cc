@@ -1315,11 +1315,14 @@ void NvgWindow::drawDebugText(QPainter &p) {
   y += height;
   p.drawText(text_x, y, str1);
 
+  static float speedLimit1 = 0.0;
   bool speedLimitValid = lmd.getSpeedLimitValid();
   float speedLimit = lmd.getSpeedLimit();
+  float speedLimitAhead = lmd.getSpeedLimitAhead();
+  if (speedLimitValid) speedLimit1 = speedLimit;
   bool turnSpeedValid = lmd.getTurnSpeedLimitValid();
   float turnSpeedLimit = lmd.getTurnSpeedLimit();
-  str.sprintf("SpeedLimit(%d): %.1f", speedLimitValid, speedLimit);
+  str.sprintf("SpeedLimit(%d): %.1f, %.1f, A:%.1f", speedLimitValid, speedLimit, speedLimit1, speedLimitAhead);
   y += height;
   p.drawText(text_x, y, str);
   str.sprintf("TurnSpeed(%d): %.1f", turnSpeedValid, turnSpeedLimit);
