@@ -377,12 +377,12 @@ void NvgWindow::drawStopLine(QPainter& painter, const UIState* s, const cereal::
     painter.save();
 
     //const UIScene& scene = s->scene;
-    painter.setBrush(QColor::fromRgbF(0.7, 0.0, 0.0, std::clamp<float>(stop_line_data.getProb(), 0.0, 0.7)));
-
+    //painter.setBrush(QColor::fromRgbF(0.7, 0.0, 0.0, std::clamp<float>(stop_line_data.getProb(), 0.0, 0.7)));
+    painter.setBrush(QColor(255, 0, 0, 255));
     const vertex_data* v = &vd.v[0];
     for (int i = 0; i < vd.cnt-1; i++) {
         painter.drawLine(v[i].x, v[i].y, v[i+1].x, v[i+1].y);
-        printf("draw stop lines...[%d,%d] [%d,%d]\n", v[i].x, v[i].y, v[i + 1].x, v[i + 1].y);
+        printf("draw stop lines...[%.1f,%.1f] [%.1f,%.1f]\n", v[i].x, v[i].y, v[i + 1].x, v[i + 1].y);
     }
 
     painter.restore();
