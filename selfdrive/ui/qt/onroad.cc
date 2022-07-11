@@ -377,10 +377,10 @@ void NvgWindow::drawStopLine(QPainter& painter, const UIState* s, const cereal::
     painter.save();
 
     //const UIScene& scene = s->scene;
-    painter.setBrush(QColor::fromRgbF(0.7, 0.0, 0.0, std::clamp<float>(stop_line_data.getProb(), 0.0, 0.7)));
+    painter.setBrush(QColor::fromRgbF(1.0, 0.0, 0.0, std::clamp<float>(stop_line_data.getProb(), 0.0, 1.0)));
     //painter.setBrush(QColor(255, 0, 0, 255));
     //painter.setBrush(redColor(200));
-    painter.drawPolyline(vd);
+    painter.drawPolygon(vd);
     //printf("drawStopLine...\n");
     painter.restore();
 }
