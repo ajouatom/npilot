@@ -65,7 +65,7 @@ class CarInterfaceBase(ABC):
     self.CS = None
     self.can_parsers = []
 
-    self.cruiseGap = 4
+    self.cruiseGap = 2
 
     if CarState is not None:
       self.CS = CarState(CP)
