@@ -86,7 +86,11 @@ class Route():
       b = np.arctan2(v[:, 0], v[:, 1])
 
       # - Find index of las_wr section and calculate deltas of bearings to the other sections.
-      last_wr_idx = way_relations.index(last_wr)
+      try:
+        last_wr_idx = way_relations.index(last_wr)
+      except:
+        last_wr_idx = 0
+        pass
       b_ref = b[last_wr_idx]
       delta = b - b_ref
 
@@ -338,3 +342,7 @@ class Route():
   @property
   def current_road_name(self):
     return self.current_wr.road_name if self.located else None
+
+  @property
+  def current_ref_num(self):
+    return self.current_wr.ref_num if self.located else None

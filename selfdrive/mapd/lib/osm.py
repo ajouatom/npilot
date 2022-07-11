@@ -1,6 +1,11 @@
 import overpy
+import subprocess
 import numpy as np
 from selfdrive.mapd.lib.geo import R
+from selfdrive.mapd.lib.helpers import is_local_osm_installed
+
+
+_LOCAL_OSM = is_local_osm_installed()
 
 
 def create_way(way_id, node_ids, from_way):
@@ -14,7 +19,7 @@ def create_way(way_id, node_ids, from_way):
 class OSM():
   def __init__(self):
     self.api = overpy.Overpass()
-    # self.api = overpy.Overpass(url='http://3.65.170.21/api/interpreter')
+    # self.api = overpy.Overpass(url='https://z.overpass-api.de/api/interpreter')
 
   def fetch_road_ways_around_location(self, lat, lon, radius):
     # Calculate the bounding box coordinates for the bbox containing the circle around location.
@@ -29,7 +34,13 @@ class OSM():
         out;
         """
     try:
-      ways = self.api.query(q).ways
+      if _LOCAL_OSM:
+        print("Query OSM from Local Server")
+        completion = subprocess.run(["/data/osm/v0.7.56/bin/osm3s_query", "--db-dir=/data/osm/db", f'--request={q}'], check=True, capture_output=True)
+        ways = self.api.parse_xml(completion.stdout).ways
+      else:
+        print("Query OSM from remote Server")
+        ways = self.api.query(q).ways
     except Exception as e:
       print(f'Exception while querying OSM:\n{e}')
       ways = []

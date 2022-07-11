@@ -1847,6 +1847,8 @@ struct LiveMapData {
   lastGpsBearingDeg @17 :Float32;
   lastGpsAccuracy @18 :Float32;
   lastGpsBearingAccuracyDeg @19 :Float32;
+  roadCameraOffset @20 :Float32;
+  ref @21 :Text;
 }
 
 struct Sentinel {
