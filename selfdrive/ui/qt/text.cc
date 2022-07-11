@@ -4,6 +4,10 @@
 #include <QScrollBar>
 #include <QVBoxLayout>
 #include <QWidget>
+#include <QProcess>
+#include <QHostAddress>
+#include <QNetworkInterface>
+#include <QAbstractSocket>
 
 #include "system/hardware/hw.h"
 #include "selfdrive/ui/qt/util.h"
