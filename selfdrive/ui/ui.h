@@ -105,7 +105,7 @@ typedef struct UIScene {
   QPolygonF track_vertices;
   QPolygonF lane_line_vertices[4];
   QPolygonF road_edge_vertices[2];
-  line_vertices_data stop_line_vertices;
+  QPolygonF stop_line_vertices;
 
   // lead
   QPointF lead_vertices[2];

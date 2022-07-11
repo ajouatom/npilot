@@ -373,24 +373,14 @@ void NvgWindow::drawLead(QPainter &painter, const cereal::ModelDataV2::LeadDataV
   painter.restore();
 }
 
-void NvgWindow::drawStopLine(QPainter& painter, const UIState* s, const cereal::ModelDataV2::StopLineData::Reader &stop_line_data, const line_vertices_data &vd) {
+void NvgWindow::drawStopLine(QPainter& painter, const UIState* s, const cereal::ModelDataV2::StopLineData::Reader &stop_line_data, const QPolygonF &vd) {
     painter.save();
 
     //const UIScene& scene = s->scene;
-    //painter.setBrush(QColor::fromRgbF(0.7, 0.0, 0.0, std::clamp<float>(stop_line_data.getProb(), 0.0, 0.7)));
+    painter.setBrush(QColor::fromRgbF(0.7, 0.0, 0.0, std::clamp<float>(stop_line_data.getProb(), 0.0, 0.7)));
     //painter.setBrush(QColor(255, 0, 0, 255));
-    const vertex_data* v = &vd.v[0];
-    if (vd.cnt >= 2) {
-        QPointF tt[] = { {v[0].x, v[0].y}, {v[1].x, v[1].y} };
-        painter.setBrush(redColor(200));
-        painter.drawPolygon(tt, std::size(tt));
-        printf("draw stop lines... [% .1f, % .1f][% .1f, % .1f]\n", v[0].x, v[0].y, v[0 + 1].x, v[0 + 1].y);
-    }
-    //for (int i = 0; i < vd.cnt-1; i++) {
-    //    painter.drawLine(v[i].x, v[i].y, v[i+1].x, v[i+1].y);
-        //printf("draw stop lines...[%.1f,%.1f] [%.1f,%.1f]\n", v[i].x, v[i].y, v[i + 1].x, v[i + 1].y);
-    //}
-
+    //painter.setBrush(redColor(200));
+    painter.drawPolyline(vd);
     painter.restore();
 }
 
