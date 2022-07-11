@@ -13,7 +13,7 @@ from common.params import Params
 
 
 _DEBUG = False
-_CLOUDLOG_DEBUG = True
+_CLOUDLOG_DEBUG = False
 
 
 def _debug(msg, log_to_cloud=True):
