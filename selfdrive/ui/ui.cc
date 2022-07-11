@@ -85,10 +85,10 @@ static void update_stop_line_data(const UIState *s, const cereal::ModelDataV2::S
   const auto line_x = line.getX(), line_y = line.getY(), line_z = line.getZ();
   QPolygonF points;
   QPointF point;
-  if (calib_frame_to_full_frame(s, line_x + x_off, line_y - y_off, line_z + z_off, &point)) points.push_back(point);
-  if(calib_frame_to_full_frame(s, line_x + x_off, line_y + y_off, line_z + z_off, &point)) points.push_back(point);
-  if(calib_frame_to_full_frame(s, line_x - x_off, line_y + y_off, line_z + z_off, &point)) points.push_back(point);
-  if(calib_frame_to_full_frame(s, line_x - x_off, line_y - y_off, line_z + z_off, &point)) points.push_back(point);
+  if (calib_frame_to_full_frame(s, line_x + x_off, line_y - y_off, line_z + z_off, &point)) points+=push(point);
+  if(calib_frame_to_full_frame(s, line_x + x_off, line_y + y_off, line_z + z_off, &point)) points.push(point);
+  if(calib_frame_to_full_frame(s, line_x - x_off, line_y + y_off, line_z + z_off, &point)) points.push(point);
+  if(calib_frame_to_full_frame(s, line_x - x_off, line_y - y_off, line_z + z_off, &point)) points.push(point);
 }
 
 
