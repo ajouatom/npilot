@@ -222,6 +222,7 @@ def thermald_thread(end_event, hw_queue):
         restart_triggered_ts = sec_since_boot()
 
     if not params.get_bool("IsOpenpilotViewEnabled") and sm.updated['pandaStates'] and len(pandaStates) > 0:
+      is_openpilot_view_enabled = 0
 
       # Set ignition based on any panda connected
       onroad_conditions["ignition"] = any(ps.ignitionLine or ps.ignitionCan for ps in pandaStates if ps.pandaType != log.PandaState.PandaType.unknown)
