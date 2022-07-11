@@ -382,6 +382,7 @@ void NvgWindow::drawStopLine(QPainter& painter, const UIState* s, const cereal::
     const vertex_data* v = &vd.v[0];
     for (int i = 0; i < vd.cnt-1; i++) {
         painter.drawLine(v[i].x, v[i].y, v[i+1].x, v[i+1].y);
+        printf("draw stop lines...[%d,%d] [%d,%d]\n", v[i].x, v[i].y, v[i + 1].x, v[i + 1].y);
     }
 
     painter.restore();
@@ -500,7 +501,6 @@ void NvgWindow::drawHud(QPainter &p, const cereal::ModelDataV2::Reader &model) {
       if (stop_line.getProb() > .5) {
           //ui_draw_stop_line(s, stop_line, s->scene.stop_line_vertices);
           drawStopLine(p, s, stop_line, s->scene.stop_line_vertices);
-          printf("draw stop lines...\n");
       }
   }
 
