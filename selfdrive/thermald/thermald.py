@@ -129,6 +129,7 @@ def hw_state_thread(end_event, hw_queue):
           modem_temps=modem_temps,
           wifi_address=HARDWARE.get_ip_address(),
         )
+        print("netowrk_metered = {}", network_metered)
 
         try:
           hw_queue.put_nowait(hw_state)
