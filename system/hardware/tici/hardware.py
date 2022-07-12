@@ -249,7 +249,7 @@ class Tici(HardwareBase):
 
         if network_type == NetworkType.wifi:
           print(metered_prop)
-          if metered_prop in [NMMetered.NM_METERED_YES, NMMetered.NM_METERED_GUESS_YES]:
+          if metered_prop in [NMMetered.NM_METERED_YES, NMMetered.NM_METERED_GUESS_YES, NMMetered.NM_METERED_GUESS_NO]:
             return True
         elif network_type in [NetworkType.cell2G, NetworkType.cell3G, NetworkType.cell4G, NetworkType.cell5G]:
           if metered_prop == NMMetered.NM_METERED_NO:
