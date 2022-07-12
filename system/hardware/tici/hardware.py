@@ -49,7 +49,7 @@ class NMMetered(IntEnum):
   NM_METERED_GUESS_YES = 3
   NM_METERED_GUESS_NO = 4
 
-TIMEOUT = 0.2
+TIMEOUT = 0.1
 
 NetworkType = log.DeviceState.NetworkType
 NetworkStrength = log.DeviceState.NetworkStrength
