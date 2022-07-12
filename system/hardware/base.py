@@ -72,7 +72,6 @@ class HardwareBase(ABC):
     pass
 
   def get_network_metered(self, network_type) -> bool:
-    print(network_type)
     return network_type not in (NetworkType.none, NetworkType.wifi, NetworkType.ethernet)
 
   @staticmethod
