@@ -394,27 +394,27 @@ class LongitudinalMpc:
     # self.on_stopping: 정지하고 있는상태
     # self.status: 전방레이더 감지..
 
-    xstate = 0
+    xstate = "NONE"
     # 전방 차량있고 정지상태가 아니면 크루즈 진행
-    if self.status and not self.on_stopping and not self.e2eMode:
-      xstate = 1
+    if self.status and not self.on_stopping:
+      xstate = "LEAD"
       x_obstacles = np.column_stack([lead_0_obstacle, lead_1_obstacle, cruise_obstacle])
     # 모델x 30이상, 정지선이 30이하, 속도가 느리면, x에서 정지..
     elif x[N] > 30 and stopline[N] < 30 and self.v_ego < 6.0:
-      xstate = 2
+      xstate = "STOP"
       self.on_stopping = False
       x_obstacles = np.column_stack([lead_0_obstacle, lead_1_obstacle, cruise_obstacle, x])
-    # 크루즈 진행이 100이하, 정지라인이 100이하이면 크루즈 또는 정지라인에서 정지 준비...
-    elif x[N] < 100 and stopline[N] < 100:
-      xstate = 3
+    # 모델x 100이하, 정지라인이 100이하이면 크루즈 또는 정지라인에서 정지 준비...
+    elif x[N] < 100 and stopline[N] < 100 and not self.e2eMode:
+      xstate = "PREP"
       self.on_stopping = True
       x_obstacles = np.column_stack([lead_0_obstacle, lead_1_obstacle, cruise_obstacle*1., (stopline*0.5)+(x*0.5)])
     # 정지준비가 되어 있을때, x에서 정지..
     elif x[N] < 100 and self.on_stopping:
-      xstate = 4
+      xstate = "STOPPING"
       x_obstacles = np.column_stack([lead_0_obstacle, lead_1_obstacle, cruise_obstacle*1., x])
     else:
-      xstate = 5
+      xstate = "CRUISE"
       self.on_stopping = False
       x_obstacles = np.column_stack([lead_0_obstacle, lead_1_obstacle, cruise_obstacle])
 
