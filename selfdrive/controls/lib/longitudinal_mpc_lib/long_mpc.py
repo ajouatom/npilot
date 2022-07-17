@@ -389,7 +389,7 @@ class LongitudinalMpc:
     #stopping: stop라인 감지..
     stopline = (model.stopLine.x + 10.0) * np.ones(N+1) if stopping else 400 * np.ones(N+1)
     #x: 모델에서 제공하는 진행상태..
-    x = (x[N] + 6.0) * np.ones(N+1)
+    x = (x[N] + 10.0) * np.ones(N+1)
 
     # self.on_stopping: 정지하고 있는상태
     # self.status: 전방레이더 감지..
