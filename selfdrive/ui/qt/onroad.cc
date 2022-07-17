@@ -538,7 +538,7 @@ void NvgWindow::drawHud(QPainter &p, const cereal::ModelDataV2::Reader &model) {
                       );
   // info
 
-  infoText = s->scene.debugText;
+  infoText = s->scene.longitudinalPlan.debugText;
 
   p.save();
   configFont(p, "Inter", 34, "Regular");
