@@ -60,7 +60,6 @@ class Planner:
     self.solverExecutionTime = 0.0
     self.activateE2E = False # ajouatom
 
-    self.debugText = ""
 
   def update(self, sm):
     v_ego = sm['carState'].vEgo
@@ -150,6 +149,6 @@ class Planner:
     longitudinalPlan.stopLine = self.mpc.stopline.tolist()
     longitudinalPlan.stoplineProb = self.mpc.stop_prob
 
-    longitudinalPlan.debugText = self.debugText
+    longitudinalPlan.debugText = self.mpc.debugText
 
     pm.send('longitudinalPlan', plan_send)
