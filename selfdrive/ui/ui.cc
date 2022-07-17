@@ -228,7 +228,7 @@ static void update_state(UIState *s) {
           scene.longitudinalPlan.stopline[i] = lop_data.getStopLine()[i];
       }
       scene.longitudinalPlan.stopprob = lop_data.getStoplineProb();
-      scene.longitudinalPlan.debugText = lop_data.getDebugText.cStr();
+      scene.longitudinalPlan.debugText = lop_data.getDebugText().cStr();
   }
 
   if( scene.IsOpenpilotViewEnabled )
