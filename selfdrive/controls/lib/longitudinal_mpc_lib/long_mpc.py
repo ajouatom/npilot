@@ -222,6 +222,8 @@ class LongitudinalMpc:
     self.stop_prob = 0.0
 
     self.on_stopping = False
+    self.debugText = ""
+    
   def reset(self):
     # self.solver = AcadosOcpSolverCython(MODEL_NAME, ACADOS_SOLVER_TYPE, N)
     self.solver.reset()
