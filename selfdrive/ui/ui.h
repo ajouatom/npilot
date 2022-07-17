@@ -126,6 +126,7 @@ typedef struct UIScene {
       float cruisetg[13] = { 0 };
       float stopline[13] = { 0 };
       float stopprob;
+      QString debugText;
   } longitudinalPlan;
 } UIScene;
 

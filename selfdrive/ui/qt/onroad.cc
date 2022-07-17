@@ -536,8 +536,9 @@ void NvgWindow::drawHud(QPainter &p, const cereal::ModelDataV2::Reader &model) {
                       controls_state.getSteerActuatorDelay(),
                       (trafficLight==2)?"RED":(trafficLight==1)?"GREEN":"NONE"
                       );
-
   // info
+
+  infoText = s->scene.debugText;
 
   p.save();
   configFont(p, "Inter", 34, "Regular");

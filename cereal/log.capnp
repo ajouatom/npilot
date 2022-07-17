@@ -915,6 +915,7 @@ struct LongitudinalPlan @0xe00b5b3eba12876c {
   cruiseTarget @39 :List(Float64) = [0.];
   stopLine @40 :List(Float64) = [0.];
   stoplineProb @41 :Float32;
+  debugText @42 : Text;
   enum LongitudinalPlanSource {
     lead0 @0;
     lead1 @1;
