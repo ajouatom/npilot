@@ -222,14 +222,14 @@ class CruiseHelper:
         if self.cruiseSuspended:
           # auto resuming 30KM/h가 넘을때..
           if CS.gas > resumeGasPedal and resume_cond and CS.vEgo*CV.MS_TO_KPH >=  self.autoResumeFromGasSpeed and self.autoResumeFromGas:
-            controls.v_cruise_kph = vEgo_cruise_kph + 5.0
+            controls.v_cruise_kph = vEgo_cruise_kph + 0.0
             self.v_cruise_kph_current = controls.v_cruise_kph
             self.v_cruise_kph_backup = controls.v_cruise_kph
             self.cruise_resume(controls, CS)
         # 엑셀을 밟고 주행속도가 설정속도보다 높아지면..
         elif vEgo_cruise_kph > controls.v_cruise_kph - 10.0:
           #설정속도를 주행속도도 변경함.. (파라미터화?)
-          controls.v_cruise_kph = vEgo_cruise_kph + 8.0
+          controls.v_cruise_kph = vEgo_cruise_kph + 0.0
 
         #Sync cruise Speed from Gas: 설정속도가 backup속도보다 높아지면 backup속도 변경
         if controls.v_cruise_kph > self.v_cruise_kph_backup:
@@ -254,11 +254,13 @@ class CruiseHelper:
           #전방레이더가 Params 이상 잡혀있으면 Cruise control 활성화..
           if v_ego_kph > 3.0 and self.autoResumeFromBrakeReleaseDist <  dRel < 100 :
             self.cruise_resume(controls, CS)
-            controls.v_cruise_kph = vEgo_cruise_kph + 5.0
+            controls.v_cruise_kph = vEgo_cruise_kph + 0.0
             self.v_cruise_kph_current = controls.v_cruise_kph
           # 60km/h 이하.. 직선도로 곡선 5M이내, 150M이내 정지선, 자동E2E모드 전환.
           elif v_ego_kph <= 60.0 and self.position_x < 150.0: # and abs(self.position_y) < 3.0:
-            controls.v_cruise_kph = 40.0
+            controls.v_cruise_kph = vEgo_cruise_kph + 0.0
+            if controls.v_cruise_kph > 30.0:
+              controls.v_cruise_kph = 30.0
             self.cruise_resume(controls, CS)
             self.activate_E2E = True
           # 40km/h이상, 전방에 레이더가 잡히지 않으면, 운전자가 너무빠르다고 판단.. 브레이크를 밟았을것이라고 판단....브레이크를 떼는 순간의 속도로 유지...
@@ -266,7 +268,7 @@ class CruiseHelper:
             if 0 < dRel < 100.0:
               pass
             else:
-              controls.v_cruise_kph = vEgo_cruise_kph + 5.0
+              controls.v_cruise_kph = vEgo_cruise_kph + 0.0
               self.v_cruise_kph_current = controls.v_cruise_kph
               self.cruise_resume(controls, CS)
           # 정지상태에서 전방에 10M이내 차가 있으면 Cruise control 활성화
@@ -341,20 +343,32 @@ class CruiseHelper:
           controls.events.add(EventName.cruiseResume)
           if self.cruiseSuspended:
             self.cruise_resume(controls, CS)
-            if v_cruise_kph < vEgo_cruise_kph:
-              v_cruise_kph = vEgo_cruise_kph + 3
+            v_cruise_kph = vEgo_cruise_kph + 0.0
+            #if v_cruise_kph < vEgo_cruise_kph:
+            #  v_cruise_kph = vEgo_cruise_kph + 0.0
             if self.v_cruise_kph_current < v_cruise_kph:
               self.v_cruise_kph_current = v_cruise_kph
 
         elif self.cruiseSuspended:
           self.cruise_resume(controls, CS)
-          if v_cruise_kph < vEgo_cruise_kph:
-            v_cruise_kph = vEgo_cruise_kph + 3
+          v_cruise_kph = vEgo_cruise_kph + 0.0
+          #if v_cruise_kph < vEgo_cruise_kph:
+          #  v_cruise_kph = vEgo_cruise_kph + 0.0
           if self.v_cruise_kph_current < v_cruise_kph:
             self.v_cruise_kph_current = v_cruise_kph
-        else:
+        else:          
           if vEgo_cruise_kph < v_cruise_kph:
-            v_cruise_kph = vEgo_cruise_kph + 3
+            v_cruise_kph = vEgo_cruise_kph + 0.0
+          elif v_cruise_kph > 110.0:
+            v_cruise_kph = 110.0
+          elif v_cruise_kph > 100.0:
+            v_cruise_kph = 100.0
+          elif v_cruise_kph > 70.0:
+            v_cruise_kph = 70.0
+          elif v_cruise_kph > 50.0:
+            v_cruise_kph = 50.0
+          elif v_cruise_kph > 30.0:
+            v_cruise_kph = 30.0
           self.v_cruise_kph_backup = v_cruise_kph
           self.v_cruise_kph_current = v_cruise_kph
 
