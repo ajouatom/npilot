@@ -386,37 +386,39 @@ class LongitudinalMpc:
                                v_upper)
     cruise_obstacle = np.cumsum(T_DIFFS * v_cruise_clipped) + get_safe_obstacle_distance(v_cruise_clipped, tr)
 
+    #stopping: stop라인 감지..
     stopline = (model.stopLine.x + 6.0) * np.ones(N+1) if stopping else 400 * np.ones(N+1)
+    #x: 모델에서 제공하는 진행상태..
     x = (x[N] + 6.0) * np.ones(N+1)
-
-    print("stopping={},x={:3.1f},stop={:3.1f}".format(self.on_stopping, x[N], stopline[N]))
 
     # self.on_stopping: 정지하고 있는상태
     # self.status: 전방레이더 감지..
 
+    xstate = 0
     # 전방 차량있고 정지상태가 아니면 크루즈 진행
-    if self.status and not self.on_stopping:
-      print("state.. 1")
+    if self.status and not self.on_stopping and not self.e2eMode:
+      xstate = 1
       x_obstacles = np.column_stack([lead_0_obstacle, lead_1_obstacle, cruise_obstacle])
-    # 정지선이 30이상, 정지라인이 30이하고 속도가 줄면, x에서 정지..
+    # 모델x 30이상, 정지선이 30이하, 속도가 줄면, x에서 정지..
     elif x[N] > 30 and stopline[N] < 30 and self.v_ego < 6.0:
-      print("state.. 2")
+      xstate = 2
       self.on_stopping = False
       x_obstacles = np.column_stack([lead_0_obstacle, lead_1_obstacle, cruise_obstacle, x])
-    # 크루즈 진행이 100이하, 정지라인이 100이하이면 뭐하는거지?
+    # 크루즈 진행이 100이하, 정지라인이 100이하이면 크루즈 또는 정지라인에서 정지 준비...
     elif x[N] < 100 and stopline[N] < 100:
-      print("state.. 3")
+      xstate = 3
       self.on_stopping = True
-      x_obstacles = np.column_stack([lead_0_obstacle, lead_1_obstacle, cruise_obstacle*2, (stopline*0.2)+(x*0.8)])
-    # 크
+      x_obstacles = np.column_stack([lead_0_obstacle, lead_1_obstacle, cruise_obstacle*1., (stopline*0.5)+(x*0.5)])
+    # 정지준비가 되어 있을때, x에서 정지..
     elif x[N] < 100 and self.on_stopping:
-      print("state.. 4")
-      x_obstacles = np.column_stack([lead_0_obstacle, lead_1_obstacle, cruise_obstacle*2, x])
+      xstate = 4
+      x_obstacles = np.column_stack([lead_0_obstacle, lead_1_obstacle, cruise_obstacle*1., x])
     else:
-      print("state.. 5")
+      xstate = 5
       self.on_stopping = False
       x_obstacles = np.column_stack([lead_0_obstacle, lead_1_obstacle, cruise_obstacle])
 
+    print("state={},stopping={},x={:3.1f},stop={:3.1f}".format(xstate,self.on_stopping, x[N], stopline[N]))
     self.source = SOURCES[np.argmin(x_obstacles[N])]
     self.params[:,2] = np.min(x_obstacles, axis=1)
     self.params[:,3] = np.copy(self.prev_a)
