@@ -387,7 +387,7 @@ class LongitudinalMpc:
     cruise_obstacle = np.cumsum(T_DIFFS * v_cruise_clipped) + get_safe_obstacle_distance(v_cruise_clipped, tr)
 
     #stopping: stop라인 감지..
-    stopline = (model.stopLine.x + 6.0) * np.ones(N+1) if stopping else 400 * np.ones(N+1)
+    stopline = (model.stopLine.x + 10.0) * np.ones(N+1) if stopping else 400 * np.ones(N+1)
     #x: 모델에서 제공하는 진행상태..
     x = (x[N] + 6.0) * np.ones(N+1)
 
@@ -399,7 +399,7 @@ class LongitudinalMpc:
     if self.status and not self.on_stopping and not self.e2eMode:
       xstate = 1
       x_obstacles = np.column_stack([lead_0_obstacle, lead_1_obstacle, cruise_obstacle])
-    # 모델x 30이상, 정지선이 30이하, 속도가 줄면, x에서 정지..
+    # 모델x 30이상, 정지선이 30이하, 속도가 느리면, x에서 정지..
     elif x[N] > 30 and stopline[N] < 30 and self.v_ego < 6.0:
       xstate = 2
       self.on_stopping = False
