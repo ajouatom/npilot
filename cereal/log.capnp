@@ -609,8 +609,8 @@ struct ControlsState @0x97ff69c53601abf1 {
   sccBrakeFactor @71 :Float32;
   sccCurvatureFactor @72 :Float32;
 
-  sccStockCamAct @73 :Float32;
-  sccStockCamStatus @74 :Float32;
+  debugText1 @73 : Text;
+  debugText2 @74 : Text;
 
   vCruiseTarget @75 :Float32;
   activateE2E @76 : Bool; #ajouatom

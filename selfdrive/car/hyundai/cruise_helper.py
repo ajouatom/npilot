@@ -50,6 +50,9 @@ class CruiseHelper:
     self.position_y = 300.0
     self.activate_E2E = False
 
+    self.active_cam = False
+    self.over_speed_limit = False
+
     self.update_params(0, True)
 
   def update_params(self, frame, all):
@@ -181,6 +184,26 @@ class CruiseHelper:
     spdTarget = cruise_set_speed_kph #설정속도
     v_ego_kph = CS.vEgo * CV.MS_TO_KPH    #실제속도
 
+    if True:
+      clu11_speed = CS.cluSpeedMs * CV.MS_TO_KPH
+      road_speed_limiter = get_road_speed_limiter()
+      apply_limit_speed, road_limit_speed, left_dist, first_started, max_speed_log = \
+        road_speed_limiter.get_max_speed(clu11_speed, True) #self.is_metric)
+
+      self.active_cam = road_limit_speed > 0 and left_dist > 0
+
+      if road_speed_limiter.roadLimitSpeed is not None:
+        camSpeedFactor = clip(road_speed_limiter.roadLimitSpeed.camSpeedFactor, 1.0, 1.1)
+        self.over_speed_limit = road_speed_limiter.roadLimitSpeed.camLimitSpeedLeftDist > 0 and \
+                                0 < road_limit_speed * camSpeedFactor < clu11_speed + 2
+      else:
+        self.over_speed_limit = False
+      str1 = 'applyLimit={},speedLimit={},leftDist={}'.format(apply_limit_speed, road_limit_speed, left_dist)
+      controls.debugText1 = str1
+    else:
+      pass
+
+    controls.debugText2 = "debugText2"
     if self.autoCurveSpeedCtrl:
       curve_speed = self.cal_curve_speed(controls, CS.vEgo, controls.sm.frame, self.curve_speed_last)
     else:

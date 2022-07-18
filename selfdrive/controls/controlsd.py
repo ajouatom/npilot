@@ -222,6 +222,8 @@ class Controls:
     
     #ajouatom
     self.cruise_helper = CruiseHelper()
+    self.debugText1 = ""
+    self.debugText2 = ""
 
     # TODO: no longer necessary, aside from process replay
     self.sm['liveParameters'].valid = True
@@ -834,6 +836,8 @@ class Controls:
     #ajouatom
     controlsState.vCruiseTarget = float(self.cruise_helper.v_cruise_kph_backup)
     controlsState.activateE2E = self.cruise_helper.activate_E2E
+    controlsState.debugText1 = self.debugText1
+    controlsState.debugText2 = self.debugText2
 
     controlsState.upAccelCmd = float(self.LoC.pid.p)
     controlsState.uiAccelCmd = float(self.LoC.pid.i)

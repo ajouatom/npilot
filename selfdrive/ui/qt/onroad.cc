@@ -1239,6 +1239,8 @@ void NvgWindow::drawDebugText(QPainter &p) {
 
   //int sccStockCamAct = (int)controls_state.getSccStockCamAct();
   //int sccStockCamStatus = (int)controls_state.getSccStockCamStatus();
+  QString debugText1 = controls_state.getDebugText1().cStr();
+  QString debugText2 = controls_state.getDebugText2().cStr();
 
   float vEgo = car_state.getVEgo();
   float vEgoRaw = car_state.getVEgoRaw();
@@ -1303,6 +1305,11 @@ void NvgWindow::drawDebugText(QPainter &p) {
   y += height;
   str.sprintf("Lead: %.1f/%.1f/%.1f\n", radar_dist, vision_dist, (radar_dist - vision_dist));
   p.drawText(text_x, y, str);
+
+  y += height;
+  p.drawText(text_x, y, debugText1);
+  y += height;
+  p.drawText(text_x, y, debugText2);
 
 #if 1
   const auto lmd = sm["liveMapData"].getLiveMapData();
