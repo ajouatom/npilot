@@ -184,6 +184,7 @@ class CruiseHelper:
     spdTarget = cruise_set_speed_kph #설정속도
     v_ego_kph = CS.vEgo * CV.MS_TO_KPH    #실제속도
 
+
     if True:
       clu11_speed = CS.cluSpeedMs * CV.MS_TO_KPH
       road_speed_limiter = get_road_speed_limiter()
@@ -198,8 +199,11 @@ class CruiseHelper:
                                 0 < road_limit_speed * camSpeedFactor < clu11_speed + 2
       else:
         self.over_speed_limit = False
+
       str1 = 'applyLimit={},speedLimit={},leftDist={}'.format(apply_limit_speed, road_limit_speed, left_dist)
       controls.debugText1 = str1
+      if apply_limit_speed > 0:
+        spdTarget = apply_limit_speed
     else:
       pass
 
