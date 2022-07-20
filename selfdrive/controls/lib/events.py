@@ -209,15 +209,15 @@ AlertCallbackType = Callable[[car.CarParams, car.CarState, messaging.SubMaster, 
 
 def soft_disable_alert(alert_text_2: str) -> AlertCallbackType:
   def func(CP: car.CarParams, CS: car.CarState, sm: messaging.SubMaster, metric: bool, soft_disable_time: int) -> Alert:
-    if soft_disable_time < int(0.5 / DT_CTRL):
-      return ImmediateDisableAlert(alert_text_2)
+    #if soft_disable_time < int(0.5 / DT_CTRL):
+    #  return ImmediateDisableAlert(alert_text_2)
     return SoftDisableAlert(alert_text_2)
   return func
 
 def user_soft_disable_alert(alert_text_2: str) -> AlertCallbackType:
   def func(CP: car.CarParams, CS: car.CarState, sm: messaging.SubMaster, metric: bool, soft_disable_time: int) -> Alert:
-    if soft_disable_time < int(0.5 / DT_CTRL):
-      return ImmediateDisableAlert(alert_text_2)
+    #if soft_disable_time < int(0.5 / DT_CTRL):
+    #  return ImmediateDisableAlert(alert_text_2)
     return UserSoftDisableAlert(alert_text_2)
   return func
 
@@ -328,6 +328,14 @@ def joystick_alert(CP: car.CarParams, CS: car.CarState, sm: messaging.SubMaster,
   gb, steer = list(axes)[:2] if len(axes) else (0., 0.)
   vals = f"Gas: {round(gb * 100.)}%, Steer: {round(steer * 100.)}%"
   return NormalPermanentAlert("Joystick Mode", vals)
+
+def auto_lane_change_alert(CP: car.CarParams, CS: car.CarState, sm: messaging.SubMaster, metric: bool, soft_disable_time: int) -> Alert:
+  alc_timer = sm['lateralPlan'].autoLaneChangeTimer
+  return Alert(
+    "Auto Lane Change starts in (%d)" % alc_timer,
+    "Monitor Other Vehicles",
+    AlertStatus.normal, AlertSize.mid,
+    Priority.LOWER, VisualAlert.steerRequired, AudibleAlert.none, .1, alert_rate=0.75)
 
 
 
@@ -939,6 +947,27 @@ EVENTS: Dict[int, Dict[str, Union[Alert, AlertCallbackType]]] = {
     ET.NO_ENTRY: NoEntryAlert("LKAS Disabled"),
   },
 
+  EventName.turningIndicatorOn: {
+    ET.WARNING: Alert(
+      "TAKE CONTROL",
+      "Steer Unavailable while Turning",
+      AlertStatus.userPrompt, AlertSize.small,
+      Priority.LOW, VisualAlert.none, AudibleAlert.none, .2),
+  },
+
+  EventName.autoLaneChange: {
+    ET.WARNING: auto_lane_change_alert,
+  },
+
+  EventName.slowingDownSpeed: {
+    ET.PERMANENT: Alert("Slowing down","", AlertStatus.normal, AlertSize.small,
+      Priority.MID, VisualAlert.none, AudibleAlert.none, .1),
+  },
+
+  EventName.slowingDownSpeedSound: {
+    ET.PERMANENT: Alert("Slowing down","", AlertStatus.normal, AlertSize.small,
+      Priority.HIGH, VisualAlert.none, AudibleAlert.slowingDownSpeed, 2.),
+  },
   EventName.isgActive: {
     ET.WARNING: Alert(
       "Steering paused, ISG is working",

@@ -21,7 +21,7 @@ CONTROL_N = 17
 CAR_ROTATION_RADIUS = 0.0
 
 # EU guidelines
-MAX_LATERAL_JERK = 10.0 # npilot 5.0
+MAX_LATERAL_JERK = 20.0
 
 ButtonType = car.CarState.ButtonEvent.Type
 CRUISE_LONG_PRESS = 50
@@ -38,7 +38,7 @@ CRUISE_INTERVAL_SIGN = {
 class MPC_COST_LAT:
   PATH = 1.0
   HEADING = 1.0
-  STEER_RATE = 0.4 #npilot 1.0
+  STEER_RATE = 0.4
 
 
 def apply_deadzone(error, deadzone):
@@ -124,7 +124,7 @@ def get_lag_adjusted_curvature(CP, v_ego, psis, curvatures, curvature_rates):
 
   # This is the "desired rate of the setpoint" not an actual desired rate
   desired_curvature_rate = curvature_rates[0]
-  max_curvature_rate = MAX_LATERAL_JERK / (v_ego**2) # inexact calculation, check https://github.com/commaai/openpilot/pull/24755
+  max_curvature_rate = MAX_LATERAL_JERK / (v_ego**2)
   safe_desired_curvature_rate = clip(desired_curvature_rate,
                                           -max_curvature_rate,
                                           max_curvature_rate)

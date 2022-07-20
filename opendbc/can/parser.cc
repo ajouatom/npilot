@@ -52,7 +52,7 @@ bool MessageState::parse(uint64_t sec, const std::vector<uint8_t> &dat) {
 
     bool counter_failed = false;
     if (!ignore_counter) {
-      if (sig.type == SignalType::HONDA_COUNTER || sig.type == SignalType::VOLKSWAGEN_MQB_COUNTER || sig.type == SignalType::PEDAL_COUNTER) {
+      if (sig.type == SignalType::COUNTER) {
         counter_failed = !update_counter_generic(tmp, sig.size);
       }
     }
@@ -283,9 +283,9 @@ void CANParser::UpdateValid(uint64_t sec) {
     const bool timed_out = (sec - state.last_seen_nanos) > state.check_threshold;
     if (state.check_threshold > 0 && (missing || timed_out)) {
       if (missing) {
-        //LOGE("0x%X MISSING", state.address);
+        LOGE("0x%X MISSING", state.address);
       } else if (show_missing) {
-        //LOGE("0x%X TIMEOUT", state.address);
+        LOGE("0x%X TIMEOUT", state.address);
       }
       can_valid = false;
     }

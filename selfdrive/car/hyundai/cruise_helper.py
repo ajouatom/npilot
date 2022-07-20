@@ -207,7 +207,7 @@ class CruiseHelper:
     else:
       pass
 
-    controls.debugText2 = "debugText2"
+    #controls.debugText2 = "debugText2"
     if self.autoCurveSpeedCtrl:
       curve_speed = self.cal_curve_speed(controls, CS.vEgo, controls.sm.frame, self.curve_speed_last)
     else:

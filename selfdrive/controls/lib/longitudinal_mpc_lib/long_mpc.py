@@ -35,7 +35,7 @@ X_EGO_COST = 0.
 V_EGO_COST = 0.
 A_EGO_COST = 0.
 J_EGO_COST = 5.0
-A_CHANGE_COST = 100.
+A_CHANGE_COST = 20.
 DANGER_ZONE_COST = 100.
 DANGER_ZONE_COST_E2E = 10.
 CRASH_DISTANCE = .5
@@ -43,13 +43,14 @@ LIMIT_COST = 1e6
 ACADOS_SOLVER_TYPE = 'SQP_RTI'
 
 CRUISE_GAP_BP = [1., 2., 3., 4.]
-CRUISE_GAP_V = [1.0, 1.2, 1.35, 1.5]
+CRUISE_GAP_V = [1.1, 1.3, 1.58, 2.10]
 
 AUTO_TR_BP = [0., 10.*CV.KPH_TO_MS, 70.*CV.KPH_TO_MS, 110.*CV.KPH_TO_MS]
 #AUTO_TR_V = [1., 1.2, 1.35, 1.45]
 AUTO_TR_V = [0.8, 1.0, 1.2, 1.35]
 
 AUTO_TR_CRUISE_GAP = 4
+DIFF_RADAR_VISION = 1.0
 
 
 # Fewer timestamps don't hurt performance and lead to
@@ -60,10 +61,10 @@ T_IDXS_LST = [index_function(idx, max_val=MAX_T, max_idx=N) for idx in range(N+1
 
 T_IDXS = np.array(T_IDXS_LST)
 T_DIFFS = np.diff(T_IDXS, prepend=[0.])
-MIN_ACCEL = -4.0
+MIN_ACCEL = -3.5
 T_FOLLOW = 1.45
 COMFORT_BRAKE = 2.5
-STOP_DISTANCE = 6.0
+STOP_DISTANCE = 6.3
 
 def get_stopped_equivalence_factor(v_lead):
   return (v_lead**2) / (2 * COMFORT_BRAKE)
@@ -315,7 +316,7 @@ class LongitudinalMpc:
   def process_lead(self, lead):
     v_ego = self.x0[1]
     if lead is not None and lead.status:
-      x_lead = lead.dRel
+      x_lead = lead.dRel if lead.radar else max(lead.dRel - DIFF_RADAR_VISION, 0.)
       v_lead = lead.vLead
       a_lead = lead.aLeadK
       a_lead_tau = lead.aLeadTau

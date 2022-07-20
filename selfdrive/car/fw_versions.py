@@ -12,7 +12,6 @@ from selfdrive.car.ecu_addrs import get_ecu_addrs
 from selfdrive.car.interfaces import get_interface_attr
 from selfdrive.car.fingerprints import FW_VERSIONS
 from selfdrive.car.isotp_parallel_query import IsoTpParallelQuery
-from selfdrive.car.toyota.values import CAR as TOYOTA
 from system.swaglog import cloudlog
 
 Ecu = car.CarParams.Ecu
@@ -98,6 +97,11 @@ CHRYSLER_VERSION_RESPONSE = bytes([uds.SERVICE_TYPE.READ_DATA_BY_IDENTIFIER + 0x
   p16(0xf132)
 
 CHRYSLER_RX_OFFSET = -0x280
+
+FORD_VERSION_REQUEST = bytes([uds.SERVICE_TYPE.READ_DATA_BY_IDENTIFIER]) + \
+  p16(uds.DATA_IDENTIFIER_TYPE.VEHICLE_MANUFACTURER_ECU_SOFTWARE_NUMBER)
+FORD_VERSION_RESPONSE =  bytes([uds.SERVICE_TYPE.READ_DATA_BY_IDENTIFIER + 0x40]) + \
+  p16(uds.DATA_IDENTIFIER_TYPE.VEHICLE_MANUFACTURER_ECU_SOFTWARE_NUMBER)
 
 
 @dataclass
@@ -207,6 +211,20 @@ REQUESTS: List[Request] = [
     [CHRYSLER_VERSION_REQUEST],
     [CHRYSLER_VERSION_RESPONSE],
   ),
+  # Ford
+  Request(
+    "ford",
+    [TESTER_PRESENT_REQUEST, FORD_VERSION_REQUEST],
+    [TESTER_PRESENT_RESPONSE, FORD_VERSION_RESPONSE],
+    whitelist_ecus=[Ecu.engine],
+  ),
+  Request(
+    "ford",
+    [TESTER_PRESENT_REQUEST, FORD_VERSION_REQUEST],
+    [TESTER_PRESENT_RESPONSE, FORD_VERSION_RESPONSE],
+    bus=0,
+    whitelist_ecus=[Ecu.eps, Ecu.esp, Ecu.fwdRadar, Ecu.fwdCamera],
+  ),
 ]
 
 
@@ -216,13 +234,13 @@ def chunks(l, n=128):
 
 
 def build_fw_dict(fw_versions, filter_brand=None):
-  fw_versions_dict = {}
+  fw_versions_dict = defaultdict(set)
   for fw in fw_versions:
     if filter_brand is None or fw.brand == filter_brand:
       addr = fw.address
       sub_addr = fw.subAddress if fw.subAddress != 0 else None
-      fw_versions_dict[(addr, sub_addr)] = fw.fwVersion
-  return fw_versions_dict
+      fw_versions_dict[(addr, sub_addr)].add(fw.fwVersion)
+  return dict(fw_versions_dict)
 
 
 def get_brand_addrs():
@@ -259,17 +277,18 @@ def match_fw_to_car_fuzzy(fw_versions_dict, log=True, exclude=None):
 
   match_count = 0
   candidate = None
-  for addr, version in fw_versions_dict.items():
-    # All cars that have this FW response on the specified address
-    candidates = all_fw_versions[(addr[0], addr[1], version)]
+  for addr, versions in fw_versions_dict.items():
+    for version in versions:
+      # All cars that have this FW response on the specified address
+      candidates = all_fw_versions[(addr[0], addr[1], version)]
 
-    if len(candidates) == 1:
-      match_count += 1
-      if candidate is None:
-        candidate = candidates[0]
-      # We uniquely matched two different cars. No fuzzy match possible
-      elif candidate != candidates[0]:
-        return set()
+      if len(candidates) == 1:
+        match_count += 1
+        if candidate is None:
+          candidate = candidates[0]
+        # We uniquely matched two different cars. No fuzzy match possible
+        elif candidate != candidates[0]:
+          return set()
 
   if match_count >= 2:
     if log:
@@ -291,23 +310,17 @@ def match_fw_to_car_exact(fw_versions_dict):
     for ecu, expected_versions in fws.items():
       ecu_type = ecu[0]
       addr = ecu[1:]
-      found_version = fw_versions_dict.get(addr, None)
-      if ecu_type == Ecu.esp and candidate in (TOYOTA.RAV4, TOYOTA.COROLLA, TOYOTA.HIGHLANDER, TOYOTA.SIENNA, TOYOTA.LEXUS_IS) and found_version is None:
-        continue
-
-      # On some Toyota models, the engine can show on two different addresses
-      if ecu_type == Ecu.engine and candidate in (TOYOTA.CAMRY, TOYOTA.COROLLA_TSS2, TOYOTA.CHR, TOYOTA.LEXUS_IS) and found_version is None:
-        continue
+      found_versions = fw_versions_dict.get(addr, set())
 
       # Ignore non essential ecus
-      if ecu_type not in ESSENTIAL_ECUS and found_version is None:
+      if ecu_type not in ESSENTIAL_ECUS and not len(found_versions):
         continue
 
       # Virtual debug ecu doesn't need to match the database
       if ecu_type == Ecu.debug:
         continue
 
-      if found_version not in expected_versions:
+      if not any([found_version in expected_versions for found_version in found_versions]):
         invalid.append(candidate)
         break
 
@@ -315,19 +328,16 @@ def match_fw_to_car_exact(fw_versions_dict):
 
 
 def match_fw_to_car(fw_versions, allow_fuzzy=True):
-  versions = get_interface_attr('FW_VERSIONS', ignore_none=True)
-
   # Try exact matching first
   exact_matches = [(True, match_fw_to_car_exact)]
   if allow_fuzzy:
     exact_matches.append((False, match_fw_to_car_fuzzy))
 
   for exact_match, match_func in exact_matches:
-    # For each brand, attempt to fingerprint using FW returned from its queries
+    # TODO: For each brand, attempt to fingerprint using only FW returned from its queries
     matches = set()
-    for brand in versions.keys():
-      fw_versions_dict = build_fw_dict(fw_versions, filter_brand=brand)
-      matches |= match_func(fw_versions_dict)
+    fw_versions_dict = build_fw_dict(fw_versions, filter_brand=None)
+    matches |= match_func(fw_versions_dict)
 
     if len(matches):
       return exact_match, matches
@@ -394,19 +404,21 @@ def get_fw_versions_ordered(logcan, sendcan, ecu_rx_addrs, timeout=0.1, debug=Fa
   brand_matches = get_brand_ecu_matches(ecu_rx_addrs)
 
   for brand in sorted(brand_matches, key=lambda b: len(brand_matches[b]), reverse=True):
-    car_fw = get_fw_versions(logcan, sendcan, brand=brand, timeout=timeout, debug=debug, progress=progress)
+    car_fw = get_fw_versions(logcan, sendcan, query_brand=brand, timeout=timeout, debug=debug, progress=progress)
     all_car_fw.extend(car_fw)
-    matches = match_fw_to_car_exact(build_fw_dict(car_fw))
+
+    # TODO: Until erroneous FW versions are removed, try to fingerprint on all possible combinations so far
+    _, matches = match_fw_to_car(all_car_fw, allow_fuzzy=False)
     if len(matches) == 1:
       break
 
   return all_car_fw
 
 
-def get_fw_versions(logcan, sendcan, brand=None, extra=None, timeout=0.1, debug=False, progress=False):
+def get_fw_versions(logcan, sendcan, query_brand=None, extra=None, timeout=0.1, debug=False, progress=False):
   versions = get_interface_attr('FW_VERSIONS', ignore_none=True)
-  if brand is not None:
-    versions = {brand: versions[brand]}
+  if query_brand is not None and query_brand in versions.keys():
+    versions = {query_brand: versions[query_brand]}
 
   if extra is not None:
     versions.update(extra)
@@ -434,7 +446,7 @@ def get_fw_versions(logcan, sendcan, brand=None, extra=None, timeout=0.1, debug=
   addrs.insert(0, parallel_addrs)
 
   fw_versions = {}
-  requests = [r for r in REQUESTS if brand is None or r.brand == brand]
+  requests = [r for r in REQUESTS if query_brand is None or r.brand == query_brand]
   for addr in tqdm(addrs, disable=not progress):
     for addr_chunk in chunks(addr):
       for r in requests:
@@ -444,7 +456,7 @@ def get_fw_versions(logcan, sendcan, brand=None, extra=None, timeout=0.1, debug=
 
           if addrs:
             query = IsoTpParallelQuery(sendcan, logcan, r.bus, addrs, r.request, r.response, r.rx_offset, debug=debug)
-            fw_versions.update({(r.brand, addr): (version, r) for addr, version in query.get_data(timeout).items()})
+            fw_versions.update({(r.brand, addr): (version, r) for (addr, _), version in query.get_data(timeout).items()})
         except Exception:
           cloudlog.warning(f"FW query exception: {traceback.format_exc()}")
 
@@ -497,13 +509,13 @@ if __name__ == "__main__":
 
   t = time.time()
   print("Getting vin...")
-  addr, vin = get_vin(logcan, sendcan, 1, retry=10, debug=args.debug)
-  print(f"VIN: {vin}")
+  addr, vin_rx_addr, vin = get_vin(logcan, sendcan, 1, retry=10, debug=args.debug)
+  print(f'TX: {hex(addr)}, RX: {hex(vin_rx_addr)}, VIN: {vin}')
   print(f"Getting VIN took {time.time() - t:.3f} s")
   print()
 
   t = time.time()
-  fw_vers = get_fw_versions(logcan, sendcan, brand=args.brand, extra=extra, debug=args.debug, progress=True)
+  fw_vers = get_fw_versions(logcan, sendcan, query_brand=args.brand, extra=extra, debug=args.debug, progress=True)
   _, candidates = match_fw_to_car(fw_vers)
 
   print()

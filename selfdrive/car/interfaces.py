@@ -138,11 +138,11 @@ class CarInterfaceBase(ABC):
     return ret
 
   @staticmethod
-  def configure_torque_tune(candidate, tune, steering_angle_deadzone_deg=0.0):
+  def configure_torque_tune(candidate, tune, steering_angle_deadzone_deg=0.0, use_steering_angle=True):
     params = get_torque_params(candidate)
 
     tune.init('torque')
-    tune.torque.useSteeringAngle = True
+    tune.torque.useSteeringAngle = use_steering_angle
     tune.torque.kp = 1.0 / params['LAT_ACCEL_FACTOR']
     tune.torque.kf = 1.0 / params['LAT_ACCEL_FACTOR']
     tune.torque.ki = 0.1 / params['LAT_ACCEL_FACTOR']
@@ -268,11 +268,23 @@ class CarStateBase(ABC):
                          C=[1.0, 0.0],
                          K=[[0.12287673], [0.29666309]])
 
+    self.v_ego_clu_kf = KF1D(x0=[[0.0], [0.0]],
+                         A=[[1.0, DT_CTRL], [0.0, 1.0]],
+                         C=[1.0, 0.0],
+                         K=[[0.12287673], [0.29666309]])
+
   def update_speed_kf(self, v_ego_raw):
     if abs(v_ego_raw - self.v_ego_kf.x[0][0]) > 2.0:  # Prevent large accelerations when car starts at non zero speed
       self.v_ego_kf.x = [[v_ego_raw], [0.0]]
 
     v_ego_x = self.v_ego_kf.update(v_ego_raw)
+    return float(v_ego_x[0]), float(v_ego_x[1])
+
+  def update_clu_speed_kf(self, v_ego_raw):
+    if abs(v_ego_raw - self.v_ego_clu_kf.x[0][0]) > 2.0:  # Prevent large accelerations when car starts at non zero speed
+      self.v_ego_clu_kf.x = [[v_ego_raw], [0.0]]
+
+    v_ego_x = self.v_ego_clu_kf.update(v_ego_raw)
     return float(v_ego_x[0]), float(v_ego_x[1])
 
   def get_wheel_speeds(self, fl, fr, rl, rr, unit=CV.KPH_TO_MS):

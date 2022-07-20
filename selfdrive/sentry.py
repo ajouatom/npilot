@@ -9,13 +9,15 @@ from system.hardware import HARDWARE, PC
 from system.swaglog import cloudlog
 from system.version import get_branch, get_commit, get_origin, get_version, \
                               is_comma_remote, is_dirty, is_tested_branch
+import datetime
+import traceback
 
 
 class SentryProject(Enum):
   # python project
-  SELFDRIVE = "https://6f3c7076c1e14b2aa10f5dde6dda0cc4@o33823.ingest.sentry.io/77924"
+  SELFDRIVE = "https://e470f9505d6e460ea37a0df9db38db01@o918558.ingest.sentry.io/5861877"
   # native project
-  SELFDRIVE_NATIVE = "https://3e4b586ed21a4479ad5d85083b639bc6@o33823.ingest.sentry.io/157615"
+  SELFDRIVE_NATIVE = "https://83cee0cc07d64fce867dc7191efda9d6@o918558.ingest.sentry.io/5861882"
 
 
 def report_tombstone(fn: str, message: str, contents: str) -> None:
@@ -29,13 +31,20 @@ def report_tombstone(fn: str, message: str, contents: str) -> None:
 
 
 def capture_exception(*args, **kwargs) -> None:
-  cloudlog.error("crash", exc_info=kwargs.get('exc_info', 1))
+  #cloudlog.error("crash", exc_info=kwargs.get('exc_info', 1))
 
   try:
-    sentry_sdk.capture_exception(*args, **kwargs)
-    sentry_sdk.flush()  # https://github.com/getsentry/sentry-python/issues/291
+    with open('/data/log/last_exception', 'w') as f:
+      now = datetime.datetime.now()
+      f.write(now.strftime('[%Y-%m-%d %H:%M:%S]') + "\n\n" + str(traceback.format_exc()))
   except Exception:
-    cloudlog.exception("sentry exception")
+    pass
+
+  #try:
+  #  sentry_sdk.capture_exception(*args, **kwargs)
+  #  sentry_sdk.flush()  # https://github.com/getsentry/sentry-python/issues/291
+  #except Exception:
+  #  cloudlog.exception("sentry exception")
 
 
 def set_tag(key: str, value: str) -> None:
