@@ -325,7 +325,8 @@ class CarInterface(CarInterfaceBase):
     elif candidate in EV_CAR:
       ret.safetyConfigs[0].safetyParam = 1
 
-    ret.centerToFront = ret.wheelbase * 0.4
+    if ret.centerToFront == 0:
+      ret.centerToFront = ret.wheelbase * 0.4
 
     # TODO: get actual value, for now starting with reasonable value for
     # civic and scaling by mass and wheelbase
