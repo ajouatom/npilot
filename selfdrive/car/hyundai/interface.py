@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from cereal import car
 from panda import Panda
+from common.numpy_fast import interp
 from common.conversions import Conversions as CV
 from selfdrive.car.hyundai.values import CAR, DBC, HDA2_CAR, EV_CAR, HYBRID_CAR, LEGACY_SAFETY_MODE_CAR, Buttons, CarControllerParams
 from selfdrive.car.hyundai.radar_interface import RADAR_START_ADDR
