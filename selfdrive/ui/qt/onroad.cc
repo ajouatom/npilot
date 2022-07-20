@@ -80,6 +80,7 @@ void OnroadWindow::updateState(const UIState &s) {
     }
     alerts->updateAlert(alert, bgColor);
   }
+  }
 
   if (s.scene.map_on_left) {
     split->setDirection(QBoxLayout::LeftToRight);
