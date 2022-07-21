@@ -598,7 +598,7 @@ struct ControlsState @0x97ff69c53601abf1 {
     torqueState @60 :LateralTorqueState;
   }
 
-  angleSteers @63 :Float32;
+  angleSteers @67 :Float32;
   applyAccel @64 :Float32;
   aReqValue @65 :Float32;
   aReqValueMin @66 :Float32;
