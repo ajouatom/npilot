@@ -221,7 +221,7 @@ struct CarState {
   charging @43 :Bool;
 
 
-  cluSpeedMs @44 :Float32;
+  cluSpeedMs @50 :Float32;
   cruiseGap @45 : Int32;
   autoHold @46 : Int32;
   tpms @47 : Tpms;
