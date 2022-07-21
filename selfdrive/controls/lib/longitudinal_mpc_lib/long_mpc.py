@@ -390,9 +390,9 @@ class LongitudinalMpc:
     cruise_obstacle = np.cumsum(T_DIFFS * v_cruise_clipped) + get_safe_obstacle_distance(v_cruise_clipped, tr)
 
     #stopping: stop라인 감지..
-    stopline = (model.stopLine.x + 6.0) * np.ones(N+1) if stopping else 400 * np.ones(N+1)
+    stopline = (model.stopLine.x + 0.0) * np.ones(N+1) if stopping else 400 * np.ones(N+1)
     #x: 모델에서 제공하는 진행상태..
-    x = (x[N] + 6.0) * np.ones(N+1)
+    x = (x[N] + 0.0) * np.ones(N+1)
 
     # self.on_stopping: 정지하고 있는상태
     # self.status: 전방레이더 감지..
