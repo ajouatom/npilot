@@ -382,9 +382,8 @@ class CarInterface(CarInterfaceBase):
           print("cruiseGap={}", self.cruiseGap )
 
     if not self.CS.CP.openpilotLongitudinalControl:
-      self.cruiseGap = ret.cruiseState.cruiseGap # ajouatom: carstate���� �о��..
+      self.cruiseGap = ret.cruiseGap
 
-    ret.cruiseState.cruiseGap = self.cruiseGap  #ajouatom      
     ret.cruiseGap = self.cruiseGap
     # low speed steer alert hysteresis logic (only for cars with steer cut off above 10 m/s)
     if ret.vEgo < (self.CP.minSteerSpeed + 2.) and self.CP.minSteerSpeed > 10.:
