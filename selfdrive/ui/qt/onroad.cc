@@ -1302,9 +1302,9 @@ void NvgWindow::drawDebugText(QPainter &p) {
   float vEgoRaw = car_state.getVEgoRaw();
   int longControlState = (int)controls_state.getLongControlState();
   float vPid = controls_state.getVPid();
-  float upAccelCmd = controls_state.getUpAccelCmd();
-  float uiAccelCmd = controls_state.getUiAccelCmd();
-  float ufAccelCmd = controls_state.getUfAccelCmd();
+  //float upAccelCmd = controls_state.getUpAccelCmd();
+  //float uiAccelCmd = controls_state.getUiAccelCmd();
+  //float ufAccelCmd = controls_state.getUfAccelCmd();
   float accel = car_control.getActuators().getAccel();
 
   const char* long_state[] = {"off", "pid", "stopping", "starting"};
@@ -1324,6 +1324,7 @@ void NvgWindow::drawDebugText(QPainter &p) {
   str.sprintf("vPid: %.2f/%.2f\n", vPid, vPid*3.6f);
   p.drawText(text_x, y, str);
 
+#if 0
   y += height;
   str.sprintf("P: %.3f\n", upAccelCmd);
   p.drawText(text_x, y, str);
@@ -1335,6 +1336,7 @@ void NvgWindow::drawDebugText(QPainter &p) {
   y += height;
   str.sprintf("F: %.3f\n", ufAccelCmd);
   p.drawText(text_x, y, str);
+#endif
 
   y += height;
   str.sprintf("Accel: %.3f\n", accel);
