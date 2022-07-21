@@ -58,7 +58,7 @@ class CarInterface(CarInterfaceBase):
     # added to selfdrive/car/tests/routes.py, we can remove it from this list.
     ret.dashcamOnly = candidate in {CAR.KIA_OPTIMA_H, CAR.ELANTRA_GT_I30}
 
-    ret.steerActuatorDelay = 0.1  # Default delay
+    ret.steerActuatorDelay = 0.05  # Default delay
     ret.steerLimitTimer = 0.4
     tire_stiffness_factor = 1.
 
@@ -94,7 +94,7 @@ class CarInterface(CarInterfaceBase):
       torque_tune(ret.lateralTuning, 2.5, 0.01)
 
     ret.steerRatio = 16.5
-    ret.steerActuatorDelay = 0.2
+    ret.steerActuatorDelay = 0.05
 
     ret.steerLimitTimer = 2.5
 
