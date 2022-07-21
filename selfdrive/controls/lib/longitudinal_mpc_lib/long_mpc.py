@@ -399,7 +399,7 @@ class LongitudinalMpc:
 
     xstate = "NONE"
     # 전방 차량있고 정지상태가 아니면 크루즈 진행
-    if self.status and not self.on_stopping:
+    if self.status and not self.on_stopping and not self.e2eMode:
       xstate = "LEAD"
       x_obstacles = np.column_stack([lead_0_obstacle, lead_1_obstacle, cruise_obstacle])
     # 모델x 30이상, 정지선이 30이하, 속도가 느리면, x에서 정지..
