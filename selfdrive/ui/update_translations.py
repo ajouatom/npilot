@@ -3,14 +3,14 @@ import argparse
 import json
 import os
 
-BASEDIR = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), "../../"))
+from common.basedir import BASEDIR
 
 UI_DIR = os.path.join(BASEDIR, "selfdrive", "ui")
 TRANSLATIONS_DIR = os.path.join(UI_DIR, "translations")
 LANGUAGES_FILE = os.path.join(TRANSLATIONS_DIR, "languages.json")
 
 
-def update_translations(release=False, vanish=False, translations_dir=TRANSLATIONS_DIR):
+def update_translations(vanish=False, translations_dir=TRANSLATIONS_DIR):
   with open(LANGUAGES_FILE, "r") as f:
     translation_files = json.load(f)
 
@@ -26,16 +26,14 @@ def update_translations(release=False, vanish=False, translations_dir=TRANSLATIO
     ret = os.system(args)
     assert ret == 0
 
-    if release:
-      ret = os.system(f"lrelease {tr_file}")
-      assert ret == 0
+    ret = os.system(f"lrelease {tr_file}")
+    assert ret == 0
 
 
 if __name__ == "__main__":
   parser = argparse.ArgumentParser(description="Update translation files for UI",
                                    formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-  parser.add_argument("--release", action="store_true", help="Create compiled QM translation files used by UI")
   parser.add_argument("--vanish", action="store_true", help="Remove translations with source text no longer found")
   args = parser.parse_args()
 
-  update_translations(args.release, args.vanish)
+  update_translations(args.vanish)

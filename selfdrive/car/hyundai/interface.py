@@ -361,8 +361,7 @@ class CarInterface(CarInterfaceBase):
     # To avoid re-engaging when openpilot cancels, check user engagement intention via buttons
     # Main button also can trigger an engagement on these cars
     allow_enable = any(btn in ENABLE_BUTTONS for btn in self.CS.cruise_buttons) or any(self.CS.main_buttons)
-    allow_enable = allow_enable or self.CP.carFingerprint in HDA2_CAR
-    events = self.create_common_events(ret, pcm_enable=self.CS.CP.pcmCruise, allow_enable=allow_enable or True)
+    events = self.create_common_events(ret, pcm_enable=self.CS.CP.pcmCruise, allow_enable=allow_enable)
 
     if self.CS.brake_error:
       events.add(EventName.brakeUnavailable)
@@ -372,6 +371,7 @@ class CarInterface(CarInterfaceBase):
       # Handle CF_Clu_CruiseSwState changing buttons mid-press
       if self.CS.cruise_buttons[-1] != 0 and self.CS.prev_cruise_buttons != 0:
         buttonEvents.append(create_button_event(0, self.CS.prev_cruise_buttons, BUTTONS_DICT))
+
       ret.buttonEvents = buttonEvents
       events.events.extend(create_button_enable_events(ret.buttonEvents))
 

@@ -14,7 +14,7 @@ class CAR:
   PACIFICA_2017_HYBRID = "CHRYSLER PACIFICA HYBRID 2017"
   PACIFICA_2018_HYBRID = "CHRYSLER PACIFICA HYBRID 2018"
   PACIFICA_2019_HYBRID = "CHRYSLER PACIFICA HYBRID 2019"
-  PACIFICA_2018 = "CHRYSLER PACIFICA 2018"  # includes 2017 Pacifica
+  PACIFICA_2018 = "CHRYSLER PACIFICA 2018"
   PACIFICA_2020 = "CHRYSLER PACIFICA 2020"
 
   # Jeep
@@ -26,10 +26,16 @@ class CAR:
 
 
 class CarControllerParams:
-  STEER_MAX = 261  # higher than this faults the EPS on Chrysler/Jeep. Ram DT allows more
-  STEER_DELTA_UP = 3
-  STEER_DELTA_DOWN = 3
-  STEER_ERROR_MAX = 80
+  def __init__(self, CP):
+    self.STEER_MAX = 261  # higher than this faults the EPS on Chrysler/Jeep. Ram DT allows more
+    self.STEER_ERROR_MAX = 80
+
+    if CP.carFingerprint in RAM_CARS:
+      self.STEER_DELTA_UP = 6
+      self.STEER_DELTA_DOWN = 6
+    else:
+      self.STEER_DELTA_UP = 3
+      self.STEER_DELTA_DOWN = 3
 
 STEER_THRESHOLD = 120
 
@@ -45,10 +51,13 @@ CAR_INFO: Dict[str, Optional[Union[ChryslerCarInfo, List[ChryslerCarInfo]]]] = {
   CAR.PACIFICA_2018_HYBRID: None,  # same platforms
   CAR.PACIFICA_2019_HYBRID: ChryslerCarInfo("Chrysler Pacifica Hybrid 2019-22"),
   CAR.PACIFICA_2018: ChryslerCarInfo("Chrysler Pacifica 2017-18"),
-  CAR.PACIFICA_2020: ChryslerCarInfo("Chrysler Pacifica 2019-20"),
+  CAR.PACIFICA_2020: [
+    ChryslerCarInfo("Chrysler Pacifica 2019-20"),
+    ChryslerCarInfo("Chrysler Pacifica 2021", package="All"),
+  ],
   CAR.JEEP_CHEROKEE: ChryslerCarInfo("Jeep Grand Cherokee 2016-18", video_link="https://www.youtube.com/watch?v=eLR9o2JkuRk"),
-  CAR.JEEP_CHEROKEE_2019: ChryslerCarInfo("Jeep Grand Cherokee 2019-20", video_link="https://www.youtube.com/watch?v=jBe4lWnRSu4"),
-  CAR.RAM_1500: ChryslerCarInfo("Ram 1500 2019-21"),
+  CAR.JEEP_CHEROKEE_2019: ChryslerCarInfo("Jeep Grand Cherokee 2019-21", video_link="https://www.youtube.com/watch?v=jBe4lWnRSu4"),
+  CAR.RAM_1500: ChryslerCarInfo("Ram 1500 2019-22"),
 }
 
 # Unique CAN messages:
