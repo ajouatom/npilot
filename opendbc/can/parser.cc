@@ -285,7 +285,7 @@ void CANParser::UpdateValid(uint64_t sec) {
       if (missing) {
         //LOGE("0x%X MISSING", state.address);
       } else if (show_missing) {
-        LOGE("0x%X TIMEOUT", state.address);
+        //LOGE("0x%X TIMEOUT", state.address);
       }
       can_valid = false;
     }
