@@ -281,7 +281,8 @@ class LongitudinalMpc:
     self.solver.cost_set(N, 'W', np.copy(W[:COST_E_DIM, :COST_E_DIM]))
 
     # Set L2 slack cost on lower bound constraints
-    Zl = np.array([LIMIT_COST, LIMIT_COST, LIMIT_COST, DANGER_ZONE_COST_E2E if self.e2eMode else DANGER_ZONE_COST])
+    #Zl = np.array([LIMIT_COST, LIMIT_COST, LIMIT_COST, DANGER_ZONE_COST_E2E if self.e2eMode else DANGER_ZONE_COST])
+    Zl = np.array([LIMIT_COST, LIMIT_COST, LIMIT_COST, DANGER_ZONE_COST])
     for i in range(N):
       self.solver.cost_set(i, 'Zl', Zl)
 
@@ -352,7 +353,7 @@ class LongitudinalMpc:
       self.lo_timer = 0
       #self.e2e = Params().get_bool("E2ELong")
 
-    self.e2e = self.e2eMode
+    self.e2e = False: #self.e2eMode
     
     xforward = ((v[1:] + v[:-1]) / 2) * (T_IDXS[1:] - T_IDXS[:-1])
     x = np.cumsum(np.insert(xforward, 0, x[0]))
