@@ -426,7 +426,7 @@ class LongitudinalMpc:
         x_obstacles = np.column_stack([lead_0_obstacle, lead_1_obstacle, cruise_obstacle])
 
     #print("state={},stopping={},x={:3.1f},stop={:3.1f}".format(xstate,self.on_stopping, x[N], stopline[N]))
-    str1 = 'state={},prob={:3.1f},stopping={},x={:3.1f},stopx={:3.1f}'.format(xstate, model.stopLine.prob, self.on_stopping, x[N], stopline[N])
+    str1 = 'state={},prob={:3.1f},stopping={},x={:3.1f},stopx={:3.1f},cr={:3.1f} {:3.1f}'.format(xstate, model.stopLine.prob, self.on_stopping, x[N], stopline[N], cruise_obstacle[0], cruise_obstacle[1])
     self.debugText = str1
 
     self.source = SOURCES[np.argmin(x_obstacles[N])]
