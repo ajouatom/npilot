@@ -404,7 +404,7 @@ class LongitudinalMpc:
       xstate = "LEAD"
       x_obstacles = np.column_stack([lead_0_obstacle, lead_1_obstacle, cruise_obstacle])
     # 모델x 30이상(신호녹색 바뀜), 정지선이 30이하, x로 제어시작..
-    elif x[N] > 30.0 and stopline[N] < 30.0 and self.v_ego < 6.0:
+    elif x[N] > 30.0 and stopline[N] < 30.0 and self.v_ego < 6.0 and not self.e2eMode:
       xstate = "STOP"
       self.on_stopping = False
       x_obstacles = np.column_stack([lead_0_obstacle, lead_1_obstacle, cruise_obstacle, x])
