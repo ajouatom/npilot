@@ -266,7 +266,7 @@ class LongitudinalMpc:
       self.set_weights_for_lead_policy(prev_accel_constraint)
 
   def set_weights_for_lead_policy(self, prev_accel_constraint=True):
-    if False: #self.e2eMode:
+    if self.e2eMode:
       a_change_cost = .1 if prev_accel_constraint else 0
       W = np.diag([0., .2, .25, 1., 0.0, 1.])
     else:
@@ -281,8 +281,7 @@ class LongitudinalMpc:
     self.solver.cost_set(N, 'W', np.copy(W[:COST_E_DIM, :COST_E_DIM]))
 
     # Set L2 slack cost on lower bound constraints
-    #Zl = np.array([LIMIT_COST, LIMIT_COST, LIMIT_COST, DANGER_ZONE_COST_E2E if self.e2eMode else DANGER_ZONE_COST])
-    Zl = np.array([LIMIT_COST, LIMIT_COST, LIMIT_COST, DANGER_ZONE_COST])
+    Zl = np.array([LIMIT_COST, LIMIT_COST, LIMIT_COST, DANGER_ZONE_COST_E2E if self.e2eMode else DANGER_ZONE_COST])
     for i in range(N):
       self.solver.cost_set(i, 'Zl', Zl)
 
