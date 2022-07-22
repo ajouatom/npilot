@@ -198,9 +198,10 @@ std::unordered_map<std::string, uint32_t> keys = {
     { "AutoResumeFromBrakeRelease", PERSISTENT },
     { "AutoResumeFromBrakeReleaseDist", PERSISTENT },
     { "AutoResumeFromBrakeReleaseLeadCar", PERSISTENT },
+    { "SpeedWeightE2E", PERSISTENT },
     {"StoppingDist", PERSISTENT},
     {"RoadList", PERSISTENT},
-
+        
 };
 
 } // namespace

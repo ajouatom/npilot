@@ -672,6 +672,9 @@ CommunityPanel::CommunityPanel(QWidget* parent) : QWidget(parent) {
   toggleLayout->addWidget(new ParamControl("AutoCurveSpeedCtrl", "SpeedControl: Vision Curve", "", "../assets/offroad/icon_road.png", this));
   toggleLayout->addWidget(new ParamControl("AutoNaviSpeedCtrl", "NDA Manager: NAVI speed", "", "../assets/offroad/icon_road.png", this));
   toggleLayout->addWidget(new CValueControl("AutoRoadLimitCtrl", "NDA:RoadLimit(1:Limit,2:Apply)", "", "../assets/offroad/icon_road.png", 0, 2, 1));
+  toggleLayout->addWidget(new CValueControl("SpeedWeightE2E", "SpeedWeight for E2E(10~100%)", "", "../assets/offroad/icon_road.png", 10, 100, 1));
+
+  
 }
 
 SelectCar::SelectCar(QWidget* parent): QWidget(parent) {

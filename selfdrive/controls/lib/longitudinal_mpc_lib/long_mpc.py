@@ -8,6 +8,7 @@ from system.swaglog import cloudlog
 from selfdrive.modeld.constants import index_function
 from selfdrive.controls.lib.radar_helpers import _LEAD_ACCEL_TAU
 from common.conversions import Conversions as CV
+from common.params import Params
 
 if __name__ == '__main__':  # generating code
   from pyextra.acados_template import AcadosModel, AcadosOcp, AcadosOcpSolver
@@ -225,6 +226,7 @@ class LongitudinalMpc:
 
     self.on_stopping = False
     self.debugText = ""
+    self.SpeedWeightE2E = 1.0
     
   def reset(self):
     # self.solver = AcadosOcpSolverCython(MODEL_NAME, ACADOS_SOLVER_TYPE, N)
@@ -351,6 +353,7 @@ class LongitudinalMpc:
     self.lo_timer += 1
     if self.lo_timer > 200:
       self.lo_timer = 0
+      self.SpeedWeightE2E = float(int(Params().get("SpeedWeightE2E", encoding="utf8")))*0.01
       #self.e2e = Params().get_bool("E2ELong")
 
     self.e2e = False #self.e2eMode
@@ -423,6 +426,7 @@ class LongitudinalMpc:
       xstate = "CRUISE"
       self.on_stopping = False
       if self.e2eMode:
+        cruise_obstacle = cruise_obstacle * self.SpeedWeightE2E
         x_obstacles = np.column_stack([lead_0_obstacle, lead_1_obstacle, cruise_obstacle if cruise_obstacle[0]<x[N] else x])
       else:
         x_obstacles = np.column_stack([lead_0_obstacle, lead_1_obstacle, cruise_obstacle])
