@@ -209,7 +209,7 @@ class CruiseHelper:
       if apply_limit_speed > 0:
         spdNaviLimit = apply_limit_speed
 
-    roadLimitSpeed = controls.sm['loadLimitSpeed'].roadLimitSpeed
+    roadLimitSpeed = controls.sm['roadLimitSpeed'].roadLimitSpeed
     if self.autoRoadLimitCtrl == 1:
       if roadLimitSpeed > 0:
         spdRoadLimit = min(spdTarget, roadLimitSpeed)
