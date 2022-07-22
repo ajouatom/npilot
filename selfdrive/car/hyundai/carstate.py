@@ -29,7 +29,7 @@ class CarState(CarStateBase):
       self.shifter_values = can_define.dv["LVR12"]["CF_Lvr_Gear"]
 
      #ajouatom
-    self.steerErrorCount = 0
+    self.mdps_error_cnt = 0
 
     self.brake_error = False
     self.park_brake = False
@@ -78,8 +78,12 @@ class CarState(CarStateBase):
     ret.steeringTorqueEps = cp.vl["MDPS12"]["CR_Mdps_OutTq"]
     ret.steeringPressed = abs(ret.steeringTorque) > self.params.STEER_THRESHOLD
     #ret.steerFaultTemporary = cp.vl["MDPS12"]["CF_Mdps_ToiUnavail"] != 0 or cp.vl["MDPS12"]["CF_Mdps_ToiFlt"] != 0
-    self.steerErrorCount += 1 if cp.vl["MDPS12"]["CF_Mdps_ToiUnavail"] != 0 or cp.vl["MDPS12"]["CF_Mdps_ToiFlt"] != 0 else -self.steerErrorCount
-    ret.steerFaultTemporary = self.steerErrorCount > 100
+    if not ret.standstill and cp_mdps.vl["MDPS12"]["CF_Mdps_ToiUnavail"] != 0:
+      self.mdps_error_cnt += 1
+    else:
+      self.mdps_error_cnt = 0
+
+    ret.steerFaultTemporary = self.mdps_error_cnt > 50
 
     # cruise state
     if self.CP.openpilotLongitudinalControl:
