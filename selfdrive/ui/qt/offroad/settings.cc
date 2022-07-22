@@ -669,7 +669,9 @@ CommunityPanel::CommunityPanel(QWidget* parent) : QWidget(parent) {
   toggleLayout->addWidget(new ParamControl("AutoResumeFromBrakeReleaseLeadCar", "CruiseON:BrakeReleaseStop", "While Stopping\nCruise On when radar dected within 10M", "../assets/offroad/icon_road.png", this));
   toggleLayout->addWidget(horizontal_line());
   toggleLayout->addWidget(new ParamControl("AutoResumeFromGas", "CruiseON:Gas", "Enable Cruise control from Gas", "../assets/offroad/icon_road.png", this));
-  toggleLayout->addWidget(new ParamControl("AutoCurveSpeedCtrl", "SpeedControl: Vision Curve", "Neokii", "../assets/offroad/icon_road.png", this));
+  toggleLayout->addWidget(new ParamControl("AutoCurveSpeedCtrl", "SpeedControl: Vision Curve", "", "../assets/offroad/icon_road.png", this));
+  toggleLayout->addWidget(new ParamControl("AutoNaviSpeedCtrl", "NDA Manager: NAVI speed", "", "../assets/offroad/icon_road.png", this));
+  toggleLayout->addWidget(new CValueControl("AutoRoadLimitCtrl", "NDA:RoadLimit(1:Limit,2:Apply)", "", "../assets/offroad/icon_road.png", 0, 2, 1));
 }
 
 SelectCar::SelectCar(QWidget* parent): QWidget(parent) {

@@ -107,7 +107,7 @@ class Controls:
         ignore += ['roadCameraState']
       self.sm = messaging.SubMaster(['deviceState', 'pandaStates', 'peripheralState', 'modelV2', 'liveCalibration',
                                      'driverMonitoringState', 'longitudinalPlan', 'lateralPlan', 'liveLocationKalman',
-                                     'managerState', 'liveParameters', 'radarState'] + self.camera_packets + joystick_packet,
+                                     'managerState', 'liveParameters', 'radarState', 'roadLimitSpeed'] + self.camera_packets + joystick_packet,
                                     ignore_alive=ignore, ignore_avg_freq=['radarState', 'longitudinalPlan'])
 
     # set alternative experiences from parameters
@@ -633,10 +633,8 @@ class Controls:
     radar = self.sm['radarState']
     if radar.leadOne.status:
       CC.hudControl.leadDistance = radar.leadOne.dRel
-      self.debugText2 = 'leadOne={:4.1f}'.format(radar.leadOne.dRel)
     else:
       CC.hudControl.leadDistance = 0
-      self.debugText2 = "None"
 
     actuators = CC.actuators
     actuators.longControlState = self.LoC.long_control_state

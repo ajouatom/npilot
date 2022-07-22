@@ -53,6 +53,8 @@ def manager_init() -> None:
     ("AutoResumeFromGasSpeed", "30"),
     ("OpkrPrebuiltOn", "0"),
     ("AutoCurveSpeedCtrl", "1"),
+    ("AutoNaviSpeedCtrl", "1"),
+    ("AutoRoadLimitCtrl", "1"),
     ("AutoResumeFromBrakeRelease", "1"),
     ("AutoResumeFromBrakeReleaseDist", "10"),
     ("AutoResumeFromBrakeReleaseLeadCar", "1"),

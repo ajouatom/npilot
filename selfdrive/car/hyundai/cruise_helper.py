@@ -27,7 +27,7 @@ WAIT_COUNT = [12, 13, 14, 15, 16]
 AliveIndex = 0
 WaitIndex = 0
 
-MIN_CURVE_SPEED = 25. * CV.KPH_TO_MS
+MIN_CURVE_SPEED = 20. * CV.KPH_TO_MS
 
 EventName = car.CarEvent.EventName
 
@@ -58,6 +58,8 @@ class CruiseHelper:
   def update_params(self, frame, all):
     if all or frame % 100 == 0:
       self.autoCurveSpeedCtrl = Params().get_bool("AutoCurveSpeedCtrl")
+      self.autoNaviSpeedCtrl = Params().get_bool("AutoNaviSpeedCtrl")
+      self.autoRoadLimitCtrl = int(Params().get("AutoRoadLimitCtrl", encoding="utf8"))
       #self.naviDecelMarginDist = float(int(Params().get("NaviDecelMarginDist", encoding="utf8")))
       #self.naviDecelRate = float(int(Params().get("NaviDecelRate", encoding="utf8")))
     if all or (frame + 30) % 100 == 0:
@@ -182,10 +184,12 @@ class CruiseHelper:
     
     cruise_set_speed_kph = self.v_cruise_kph_current
     spdTarget = cruise_set_speed_kph #설정속도
+    spdNaviLimit = spdTarget
+    spdRoadLimit = spdTarget
+    
     v_ego_kph = CS.vEgo * CV.MS_TO_KPH    #실제속도
 
-
-    if True:
+    if self.autoNaviSpeedCtrl:
       clu11_speed = CS.cluSpeedMs * CV.MS_TO_KPH
       road_speed_limiter = get_road_speed_limiter()
       apply_limit_speed, road_limit_speed, left_dist, first_started, max_speed_log = \
@@ -203,11 +207,21 @@ class CruiseHelper:
       str1 = 'applyLimit={},speedLimit={},leftDist={}'.format(apply_limit_speed, road_limit_speed, left_dist)
       controls.debugText1 = str1
       if apply_limit_speed > 0:
-        spdTarget = apply_limit_speed
-    else:
-      pass
+        spdNaviLimit = apply_limit_speed
 
-    #controls.debugText2 = "debugText2"
+    roadLimitSpeed = controls.sm['loadLimitSpeed'].roadLimitSpeed
+    if self.autoRoadLimitCtrl == 1:
+      if roadLimitSpeed > 0:
+        spdRoadLimit = min(spdTarget, roadLimitSpeed)
+    elif self.autoRoadLimitCtrl == 2:
+      if roadLimitSpeed > 0:
+        spdRoadLimit = roadLimitSpeed
+        spdTarget = spdRoadLimit
+
+    spdTarget = min(spdTarget, spdNaviLimit, spdRoadLimit)
+
+    controls.debugText2 = 'SPD:{:3.1f},NAVI:{:3.1f},ROAD:{:3.1f}'.format(spdTarget, spdNaviLimit, spdRoadLimit)
+
     if self.autoCurveSpeedCtrl:
       curve_speed = self.cal_curve_speed(controls, CS.vEgo, controls.sm.frame, self.curve_speed_last)
     else:
