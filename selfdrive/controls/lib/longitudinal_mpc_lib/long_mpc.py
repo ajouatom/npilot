@@ -382,8 +382,8 @@ class LongitudinalMpc:
     if not self.e2eMode:
       x = (x[N] + 200.0) * np.ones(N+1)
     x_targets = np.column_stack([x,
-                                lead_0_obstacle - (3/4) * get_safe_obstacle_distance(v),
-                                lead_1_obstacle - (3/4) * get_safe_obstacle_distance(v),
+                                lead_0_obstacle - (3/4) * get_safe_obstacle_distance(v, tr),
+                                lead_1_obstacle - (3/4) * get_safe_obstacle_distance(v, tr),
                                 cruise_target])
     #self.source = SOURCES[np.argmin(x_obstacles[0])]
     self.params[:,2] = 1e3
