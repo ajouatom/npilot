@@ -396,6 +396,7 @@ class LongitudinalMpc:
 
     #stopping: stop라인 감지..
     stopline = (model.stopLine.x + 0.0) * np.ones(N+1) if stopping else 400 * np.ones(N+1)
+    print("long_mpc: stopline={:3.1f}".format(stopline[N]))
     #x: 모델에서 제공하는 진행상태..
     x = (x[N] + 0.0) * np.ones(N+1)
 

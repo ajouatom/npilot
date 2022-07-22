@@ -500,7 +500,7 @@ void NvgWindow::drawHud(QPainter &p, const cereal::ModelDataV2::Reader &model) {
   //drawTurnSignals(p);
   drawGpsStatus(p);
   auto stop_line1 = (*s->sm)["modelV2"].getModelV2().getStopLine();
-  printf("stopline=[%.1f], %.1f", s->scene.longitudinalPlan.stopline[12], stop_line1.getProb());
+  printf("stopline=[%.1f], %.1f\n", s->scene.longitudinalPlan.stopline[12], stop_line1.getProb());
   if (s->scene.longitudinalPlan.stopline[12] > 3.0) {
       auto stop_line = (*s->sm)["modelV2"].getModelV2().getStopLine();
       if (stop_line.getProb() > .1) {
