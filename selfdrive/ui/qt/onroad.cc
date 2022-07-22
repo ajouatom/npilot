@@ -387,7 +387,7 @@ void NvgWindow::drawStopLine(QPainter& painter, const UIState* s, const cereal::
     //painter.setBrush(QColor(255, 0, 0, 255));
     //painter.setBrush(redColor(200));
     painter.drawPolygon(vd);
-    //printf("drawStopLine...\n");
+    printf("drawStopLine... %.1f\n", stop_line_data.getProb());
     painter.restore();
 }
 
