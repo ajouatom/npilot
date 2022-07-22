@@ -213,8 +213,6 @@ class LongitudinalMpc:
 
     self.stop_line = True #Params().get_bool("ShowStopLine")
 
-    self.lo_timer = 0 
-
     self.lead_0_obstacle = np.zeros(13, dtype=np.float64)
     self.lead_1_obstacle = np.zeros(13, dtype=np.float64)
     self.e2e_x = np.zeros(13, dtype=np.float64)
@@ -339,16 +337,8 @@ class LongitudinalMpc:
   def update(self, carstate, radarstate, model, v_cruise, x, v, a):
     self.v_ego = carstate.vEgo
     #v_ego = self.x0[1]
-    stopping = model.stopLine.prob > 0.4 if self.stop_line else False
-
-    # opkr
-    self.lo_timer += 1
-    if self.lo_timer > 200:
-      self.lo_timer = 0
-      #self.e2e = Params().get_bool("E2ELong")
-
-    self.e2e = False #self.e2eMode
-    
+    stopping = model.stopLine.prob > 0.4
+  
     xforward = ((v[1:] + v[:-1]) / 2) * (T_IDXS[1:] - T_IDXS[:-1])
     x = np.cumsum(np.insert(xforward, 0, x[0]))
     self.yref[:,1] = x
