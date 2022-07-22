@@ -442,7 +442,7 @@ class LongitudinalMpc:
     self.stopline = stopline[:]
     self.stop_prob = model.stopLine.prob
 
-    if self.e2e:
+    if self.e2e:  # 20220722: 이걸실행하면 걍 가속함~ 우찌된것인고?
       self.yref[:,1] = np.min(x_obstacles, axis=1)
       for i in range(N):
         self.solver.set(i, "yref", self.yref[i])
