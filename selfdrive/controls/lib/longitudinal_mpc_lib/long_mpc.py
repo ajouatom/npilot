@@ -353,7 +353,7 @@ class LongitudinalMpc:
       self.lo_timer = 0
       #self.e2e = Params().get_bool("E2ELong")
 
-    self.e2e = False: #self.e2eMode
+    self.e2e = False #self.e2eMode
     
     xforward = ((v[1:] + v[:-1]) / 2) * (T_IDXS[1:] - T_IDXS[:-1])
     x = np.cumsum(np.insert(xforward, 0, x[0]))
