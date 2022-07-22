@@ -369,6 +369,8 @@ class LongitudinalMpc:
     lead_1_obstacle = lead_xv_1[:,0] + get_stopped_equivalence_factor(lead_xv_1[:,1])
 
     cruise_target = T_IDXS * v_cruise + x[0]
+
+    ## 20220722: ajouatom: 이방법이 먹긴하는것 같은데..... 전체적인 반응이 너무 급하게 작동함~~
     x_targets = np.column_stack([x if self.e2eMode else cruise_target,
                                 lead_0_obstacle - (3/4) * get_safe_obstacle_distance(v, tr),
                                 lead_1_obstacle - (3/4) * get_safe_obstacle_distance(v, tr),
