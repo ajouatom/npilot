@@ -382,7 +382,8 @@ class LongitudinalMpc:
     #x = (x[N] + 0.0) * np.ones(N+1)
 
     #print("state={},stopping={},x={:3.1f},stop={:3.1f}".format(xstate,self.on_stopping, x[N], stopline[N]))
-    str1 = 'prob={:3.1f},x={:3.1f},stopx={:3.1f},ct={:3.1f}'.format(model.stopLine.prob, x[N], stopline[N], cruise_target[0])
+    #str1 = 'prob={:3.1f},x={:3.1f},stopx={:3.1f},ct={:3.1f}'.format(model.stopLine.prob, x[N], stopline[N], cruise_target[0])
+    str1 = 'prob={:3.1f},x={:3.1f},stopx={:3.1f},ct={:3.1f}'.format(model.stopLine.prob, x[0], stopline[0], cruise_target[0])
     self.debugText = str1
 
     self.params[:,3] = np.copy(self.prev_a)
