@@ -426,7 +426,8 @@ class LongitudinalMpc:
       xstate = "CRUISE"
       self.on_stopping = False
       if self.e2eMode:
-        cruise_obstacle = cruise_obstacle * self.SpeedWeightE2E
+        #cruise_obstacle = cruise_obstacle * self.SpeedWeightE2E
+        x = x * self.SpeedWeightE2E
         x_obstacles = np.column_stack([lead_0_obstacle, lead_1_obstacle, cruise_obstacle if cruise_obstacle[0]<x[N] else x])
       else:
         x_obstacles = np.column_stack([lead_0_obstacle, lead_1_obstacle, cruise_obstacle])
