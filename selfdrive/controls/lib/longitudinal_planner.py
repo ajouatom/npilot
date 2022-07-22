@@ -109,6 +109,12 @@ class Planner:
       x = np.zeros(len(T_IDXS_MPC))
       v = np.zeros(len(T_IDXS_MPC))
       a = np.zeros(len(T_IDXS_MPC))
+
+    if self.activateE2E:
+      self.mpc.e2eMode = True
+    else:
+      self.mpc.e2eMode = False
+
     self.mpc.update(sm['carState'], sm['radarState'], sm['modelV2'], v_cruise, x, v, a)
     self.v_desired_trajectory = np.interp(T_IDXS[:CONTROL_N], T_IDXS_MPC, self.mpc.v_solution)
     self.a_desired_trajectory = np.interp(T_IDXS[:CONTROL_N], T_IDXS_MPC, self.mpc.a_solution)

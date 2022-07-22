@@ -207,6 +207,7 @@ class LongitudinalMpc:
   def __init__(self, e2e=False):
     self.e2e = e2e
     self.e2eMode = False #ajouatom
+    self.e2eSpeed = 0
     self.solver = AcadosOcpSolverCython(MODEL_NAME, ACADOS_SOLVER_TYPE, N)
     self.reset()
     self.source = SOURCES[2]
@@ -343,7 +344,7 @@ class LongitudinalMpc:
   def update(self, carstate, radarstate, model, v_cruise, x, v, a):
     self.v_ego = carstate.vEgo
     v_ego = self.x0[1]
-    stopping = model.stopLine.prob > 0.5 if self.stop_line else False
+    stopping = model.stopLine.prob > 0.4 if self.stop_line else False
 
     # opkr
     self.lo_timer += 1
@@ -402,24 +403,27 @@ class LongitudinalMpc:
     if self.status and not self.on_stopping and not self.e2eMode:
       xstate = "LEAD"
       x_obstacles = np.column_stack([lead_0_obstacle, lead_1_obstacle, cruise_obstacle])
-    # 모델x 30이상, 정지선이 30이하, 속도가 느리면, x에서 정지..
-    elif x[N] > 30 and stopline[N] < 30 and self.v_ego < 6.0:
+    # 모델x 30이상(신호녹색 바뀜), 정지선이 30이하, x로 제어시작..
+    elif x[N] > 30.0 and stopline[N] < 30.0 and self.v_ego < 6.0:
       xstate = "STOP"
       self.on_stopping = False
       x_obstacles = np.column_stack([lead_0_obstacle, lead_1_obstacle, cruise_obstacle, x])
     # 모델x 100이하, 정지라인이 100이하이면 크루즈 또는 정지라인에서 정지 준비...
-    elif x[N] < 100 and stopline[N] < 100 and not self.e2eMode:
+    elif x[N] < 100.0 and stopline[N] < 100.0 and not self.e2eMode:
       xstate = "PREP"
       self.on_stopping = True
       x_obstacles = np.column_stack([lead_0_obstacle, lead_1_obstacle, cruise_obstacle*1., (stopline*0.5)+(x*0.5)])
-    # 정지준비가 되어 있을때, x에서 정지..
-    elif x[N] < 100 and self.on_stopping:
+    # 정지준비가 되어 있을때, x에서 정지.. (stopline에서 정지가 맞지않나?, x나 stopline이나 비슷~)
+    elif x[N] < 100.0 and self.on_stopping:
       xstate = "STOPPING"
       x_obstacles = np.column_stack([lead_0_obstacle, lead_1_obstacle, cruise_obstacle*1., x])
     else:
       xstate = "CRUISE"
       self.on_stopping = False
-      x_obstacles = np.column_stack([lead_0_obstacle, lead_1_obstacle, cruise_obstacle])
+      if self.e2eMode:
+        x_obstacles = np.column_stack([lead_0_obstacle, lead_1_obstacle, cruise_obstacle if cruise_obstacle[0]<x[N] else x])
+      else:
+        x_obstacles = np.column_stack([lead_0_obstacle, lead_1_obstacle, cruise_obstacle])
 
     #print("state={},stopping={},x={:3.1f},stop={:3.1f}".format(xstate,self.on_stopping, x[N], stopline[N]))
     str1 = 'state={},prob={:3.1f},stopping={},x={:3.1f},stopx={:3.1f}'.format(xstate, model.stopLine.prob, self.on_stopping, x[N], stopline[N])
