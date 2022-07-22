@@ -21,7 +21,7 @@ LONG_MPC_DIR = os.path.dirname(os.path.abspath(__file__))
 EXPORT_DIR = os.path.join(LONG_MPC_DIR, "c_generated_code")
 JSON_FILE = os.path.join(LONG_MPC_DIR, "acados_ocp_long.json")
 
-SOURCES = ['lead0', 'lead1', 'cruise', 'stop']
+SOURCES = ['lead0', 'lead1', 'cruise']
 
 X_DIM = 3
 U_DIM = 1
@@ -35,9 +35,8 @@ X_EGO_COST = 0.
 V_EGO_COST = 0.
 A_EGO_COST = 0.
 J_EGO_COST = 5.0
-A_CHANGE_COST = 100.
-DANGER_ZONE_COST = 100.
-DANGER_ZONE_COST_E2E = 10.
+A_CHANGE_COST = 200.
+DANGER_ZONE_COST = 10.
 CRASH_DISTANCE = .5
 LIMIT_COST = 1e6
 ACADOS_SOLVER_TYPE = 'SQP_RTI'
@@ -266,12 +265,8 @@ class LongitudinalMpc:
       self.set_weights_for_lead_policy(prev_accel_constraint)
 
   def set_weights_for_lead_policy(self, prev_accel_constraint=True):
-    if False: #self.e2eMode:
-      a_change_cost = .1 if prev_accel_constraint else 0
-      W = np.diag([0., .2, .25, 1., 0.0, 1.])
-    else:
-      a_change_cost = A_CHANGE_COST if prev_accel_constraint else 0
-      W = np.asfortranarray(np.diag([X_EGO_OBSTACLE_COST, X_EGO_COST, V_EGO_COST, A_EGO_COST, a_change_cost, J_EGO_COST]))
+    a_change_cost = .1 if prev_accel_constraint else 0
+    W = np.diag([0., .2, .25, 1., 0.0, 1.])
     for i in range(N):
       # reduce the cost on (a-a_prev) later in the horizon.
       W[4,4] = a_change_cost * np.interp(T_IDXS[i], [0.0, 1.0, 2.0], [1.0, 1.0, 0.0])
@@ -281,8 +276,7 @@ class LongitudinalMpc:
     self.solver.cost_set(N, 'W', np.copy(W[:COST_E_DIM, :COST_E_DIM]))
 
     # Set L2 slack cost on lower bound constraints
-    #Zl = np.array([LIMIT_COST, LIMIT_COST, LIMIT_COST, DANGER_ZONE_COST])
-    Zl = np.array([LIMIT_COST, LIMIT_COST, LIMIT_COST, DANGER_ZONE_COST_E2E if self.e2eMode else DANGER_ZONE_COST])
+    Zl = np.array([LIMIT_COST, LIMIT_COST, LIMIT_COST, DANGER_ZONE_COST])
     for i in range(N):
       self.solver.cost_set(i, 'Zl', Zl)
 
@@ -344,7 +338,7 @@ class LongitudinalMpc:
 
   def update(self, carstate, radarstate, model, v_cruise, x, v, a):
     self.v_ego = carstate.vEgo
-    v_ego = self.x0[1]
+    #v_ego = self.x0[1]
     stopping = model.stopLine.prob > 0.4 if self.stop_line else False
 
     # opkr
@@ -366,7 +360,7 @@ class LongitudinalMpc:
     lead_xv_1 = self.process_lead(radarstate.leadTwo)
 
     # set accel limits in params
-    self.params[:,0] = interp(float(self.status), [0.0, 1.0], [self.cruise_min_a, MIN_ACCEL])
+    self.params[:,0] = self.cruise_min_a
     self.params[:,1] = self.cruise_max_a
 
     # neokii
@@ -384,69 +378,39 @@ class LongitudinalMpc:
     lead_0_obstacle = lead_xv_0[:,0] + get_stopped_equivalence_factor(lead_xv_0[:,1])
     lead_1_obstacle = lead_xv_1[:,0] + get_stopped_equivalence_factor(lead_xv_1[:,1])
 
-    v_lower = v_ego + (T_IDXS * self.cruise_min_a * 1.05)
-    v_upper = v_ego + (T_IDXS * self.cruise_max_a * 1.05)
-    v_cruise_clipped = np.clip(v_cruise * np.ones(N+1),
-                               v_lower,
-                               v_upper)
-    cruise_obstacle = np.cumsum(T_DIFFS * v_cruise_clipped) + get_safe_obstacle_distance(v_cruise_clipped, tr)
+    cruise_target = T_IDXS * v_cruise + x[0]
+    if not self.e2eMode:
+      x = (x[N] + 200.0) * np.ones(N+1)
+    x_targets = np.column_stack([x,
+                                lead_0_obstacle - (3/4) * get_safe_obstacle_distance(v),
+                                lead_1_obstacle - (3/4) * get_safe_obstacle_distance(v),
+                                cruise_target])
+    #self.source = SOURCES[np.argmin(x_obstacles[0])]
+    self.params[:,2] = 1e3
 
     #stopping: stop라인 감지..
     stopline = (model.stopLine.x + 0.0) * np.ones(N+1) if stopping else 400 * np.ones(N+1)
     #x: 모델에서 제공하는 진행상태..
-    x = (x[N] + 0.0) * np.ones(N+1)
-
-    # self.on_stopping: 정지하고 있는상태
-    # self.status: 전방레이더 감지..
-
-    xstate = "NONE"
-    # 전방 차량있고 정지상태가 아니면 크루즈 진행
-    if self.status and not self.on_stopping and not self.e2eMode:
-      xstate = "LEAD"
-      x_obstacles = np.column_stack([lead_0_obstacle, lead_1_obstacle, cruise_obstacle])
-    # 모델x 30이상(신호녹색 바뀜), 정지선이 30이하, x로 제어시작..
-    elif x[N] > 30.0 and stopline[N] < 30.0 and self.v_ego < 6.0 and not self.e2eMode:
-      xstate = "STOP"
-      self.on_stopping = False
-      x_obstacles = np.column_stack([lead_0_obstacle, lead_1_obstacle, cruise_obstacle, x])
-    # 모델x 100이하, 정지라인이 100이하이면 크루즈 또는 정지라인에서 정지 준비...
-    elif x[N] < 100.0 and stopline[N] < 100.0 and not self.e2eMode:
-      xstate = "PREP"
-      self.on_stopping = True
-      x_obstacles = np.column_stack([lead_0_obstacle, lead_1_obstacle, cruise_obstacle*1., (stopline*0.5)+(x*0.5)])
-    # 정지준비가 되어 있을때, x에서 정지.. (stopline에서 정지가 맞지않나?, x나 stopline이나 비슷~)
-    elif x[N] < 100.0 and self.on_stopping and not self.e2eMode:
-      xstate = "STOPPING"
-      x_obstacles = np.column_stack([lead_0_obstacle, lead_1_obstacle, cruise_obstacle*1., x])
-    else:
-      xstate = "CRUISE"
-      self.on_stopping = False
-      if self.e2eMode:
-        x_obstacles = np.column_stack([lead_0_obstacle, lead_1_obstacle, cruise_obstacle if cruise_obstacle[0]<x[N] else x])
-      else:
-        x_obstacles = np.column_stack([lead_0_obstacle, lead_1_obstacle, cruise_obstacle])
+    #x = (x[N] + 0.0) * np.ones(N+1)
 
     #print("state={},stopping={},x={:3.1f},stop={:3.1f}".format(xstate,self.on_stopping, x[N], stopline[N]))
-    str1 = 'state={},prob={:3.1f},stopping={},x={:3.1f},stopx={:3.1f},cr={:3.1f} {:3.1f} {:3.1f} {:3.1f}'.format(xstate, model.stopLine.prob, self.on_stopping, x[N], stopline[N], cruise_obstacle[0], cruise_obstacle[1], cruise_obstacle[3], cruise_obstacle[4])
+    str1 = 'prob={:3.1f},x={:3.1f},stopx={:3.1f},ct={:3.1f}'.format(model.stopLine.prob, x[N], stopline[N], cruise_target[0])
     self.debugText = str1
 
-    self.source = SOURCES[np.argmin(x_obstacles[N])]
-    self.params[:,2] = np.min(x_obstacles, axis=1)
     self.params[:,3] = np.copy(self.prev_a)
     self.params[:,4] = self.param_tr
 
     self.e2e_x = x[:]
     self.lead_0_obstacle = lead_0_obstacle[:]
     self.lead_1_obstacle = lead_1_obstacle[:]
-    self.cruise_target = cruise_obstacle[:]
+    self.cruise_target = cruise_target[:]
     self.stopline = stopline[:]
     self.stop_prob = model.stopLine.prob
 
-    if self.e2e:
-      self.yref[:,1] = np.min(x_obstacles, axis=1)
-      for i in range(N):
-        self.solver.set(i, "yref", self.yref[i])
-      self.solver.set(N, "yref", self.yref[N][:COST_E_DIM])
+    self.yref[:,1] = np.min(x_targets, axis=1)
+    for i in range(N):
+      self.solver.set(i, "yref", self.yref[i])
+    self.solver.set(N, "yref", self.yref[N][:COST_E_DIM])
 
     self.run()
     if (np.any(lead_xv_0[:,0] - self.x_sol[:,0] < CRASH_DISTANCE) and
