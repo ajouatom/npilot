@@ -400,16 +400,6 @@ class CruiseHelper:
         else:          
           if vEgo_cruise_kph < v_cruise_kph:
             v_cruise_kph = vEgo_cruise_kph + 0.0
-          elif v_cruise_kph > 110.0:
-            v_cruise_kph = 110.0
-          elif v_cruise_kph > 100.0:
-            v_cruise_kph = 100.0
-          elif v_cruise_kph > 70.0:
-            v_cruise_kph = 70.0
-          elif v_cruise_kph > 50.0:
-            v_cruise_kph = 50.0
-          elif v_cruise_kph > 30.0:
-            v_cruise_kph = 30.0
           self.v_cruise_kph_backup = v_cruise_kph
           self.v_cruise_kph_current = v_cruise_kph
 
