@@ -701,7 +701,7 @@ void NvgWindow::drawSpeed(QPainter &p) {
   const bool show_road_name = current_ts - lmd_fix_time < 10000; // hide if fix older than 10s
   QString str1;
   str1 = show_road_name ? QString::fromStdString(lmd.getCurrentRoadName()) : "";
-  drawText(p, rect().center().x(), 310, str1, 500);
+  drawText(p, rect().center().x(), 310, str1, 200);
 
   p.restore();
 }
