@@ -382,14 +382,9 @@ void NvgWindow::drawLead(QPainter &painter, const cereal::ModelDataV2::LeadDataV
 void NvgWindow::drawStopLine(QPainter& painter, const UIState* s, const cereal::ModelDataV2::StopLineData::Reader &stop_line_data, const QPolygonF &vd) {
     painter.save();
 
-    //const UIScene& scene = s->scene;
-    //painter.setBrush(QColor::fromRgbF(1.0, 0.0, 0.0, std::clamp<float>(stop_line_data.getProb(), 0.0, 1.0)));
-    //painter.setBrush(QColor::fromRgbF(1.0, 0.0, 0.0, 0.9));
-    //painter.setBrush(QColor(255, 0, 0, 255));
-    painter.setBrush(redColor(127));
+    painter.setBrush(QColor::fromRgbF(1.0, 0.0, 0.0, std::clamp<float>(stop_line_data.getProb(), 0.0, 1.0)));
     painter.drawPolygon(vd);
-    
-    printf("drawStopLine... %.1f\n", stop_line_data.getProb());
+   
     painter.restore();
 }
 
@@ -502,10 +497,8 @@ void NvgWindow::drawHud(QPainter &p, const cereal::ModelDataV2::Reader &model) {
   //drawTurnSignals(p);
   drawGpsStatus(p);
   auto stop_line = (*s->sm)["modelV2"].getModelV2().getStopLine();
-  printf("stopline=[%.1f,%.1f], %.1f\n", s->scene.longitudinalPlan.stopline[12], stop_line.getX(), stop_line.getProb());
   if (stop_line.getX() > 3.0) {
-      if (stop_line.getProb() > .001) {
-          //ui_draw_stop_line(s, stop_line, s->scene.stop_line_vertices);
+      if (stop_line.getProb() > .4) {
           drawStopLine(p, s, stop_line, s->scene.stop_line_vertices);
       }
   }
