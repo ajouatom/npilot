@@ -1286,7 +1286,7 @@ void NvgWindow::drawDebugText(QPainter &p) {
   const SubMaster &sm = *(uiState()->sm);
   QString str, temp;
 
-  int y = 80;
+  int y = 80 + 180;
   const int height = 60;
 
   const int text_x = width()/2 + 250;
@@ -1295,11 +1295,11 @@ void NvgWindow::drawDebugText(QPainter &p) {
   auto car_control = sm["carControl"].getCarControl();
   auto car_state = sm["carState"].getCarState();
 
-  float applyAccel = 0.;//controls_state.getApplyAccel();
+  //float applyAccel = 0.;//controls_state.getApplyAccel();
 
-  float aReqValue = 0.;//controls_state.getAReqValue();
-  float aReqValueMin = 0.;//controls_state.getAReqValueMin();
-  float aReqValueMax = 0.;//controls_state.getAReqValueMax();
+  //float aReqValue = 0.;//controls_state.getAReqValue();
+  //float aReqValueMin = 0.;//controls_state.getAReqValueMin();
+  //float aReqValueMax = 0.;//controls_state.getAReqValueMax();
 
   //int sccStockCamAct = (int)controls_state.getSccStockCamAct();
   //int sccStockCamStatus = (int)controls_state.getSccStockCamStatus();
@@ -1350,13 +1350,13 @@ void NvgWindow::drawDebugText(QPainter &p) {
   str.sprintf("Accel: %.3f\n", accel);
   p.drawText(text_x, y, str);
 
-  y += height;
-  str.sprintf("Apply: %.3f, Stock: %.3f\n", applyAccel, aReqValue);
-  p.drawText(text_x, y, str);
+  //y += height;
+  //str.sprintf("Apply: %.3f, Stock: %.3f\n", applyAccel, aReqValue);
+  //p.drawText(text_x, y, str);
 
-  y += height;
-  str.sprintf("%.3f (%.3f/%.3f)\n", aReqValue, aReqValueMin, aReqValueMax);
-  p.drawText(text_x, y, str);
+  //y += height;
+  //str.sprintf("%.3f (%.3f/%.3f)\n", aReqValue, aReqValueMin, aReqValueMax);
+  //p.drawText(text_x, y, str);
 
   y += height;
   str.sprintf("aEgo: %.3f, %.3f\n", car_state.getAEgo(), car_state.getABasis());
