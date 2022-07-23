@@ -1377,7 +1377,7 @@ void NvgWindow::drawDebugText(QPainter &p) {
   y += height;
   p.drawText(text_x, y, debugText2);
 
-#if 1
+#if 0
   const auto lmd = sm["liveMapData"].getLiveMapData();
   const uint64_t lmd_fix_time = lmd.getLastGpsTimestamp();
   const uint64_t current_ts = std::chrono::duration_cast<std::chrono::milliseconds>
