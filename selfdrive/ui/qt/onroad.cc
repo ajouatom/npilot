@@ -691,7 +691,14 @@ void NvgWindow::drawSpeed(QPainter &p) {
   drawTextWithColor(p, rect().center().x(), 230, speed, color);
 
   configFont(p, "Inter", 66, "Regular");
-  drawText(p, rect().center().x(), 310, s->scene.is_metric ? "km/h" : "mph", 200);
+  //drawText(p, rect().center().x(), 310, s->scene.is_metric ? "km/h" : "mph", 200);
+
+
+  const auto lmd = sm["liveMapData"].getLiveMapData();
+  const bool show_road_name = current_ts - lmd_fix_time < 10000; // hide if fix older than 10s
+  QString str1;
+  str1 = show_road_name ? QString::fromStdString(lmd.getCurrentRoadName()) : "";
+  drawText(p, rect().center().x(), 310, s->scene.is_metric ? "km/h" : "mph", 500);
 
   p.restore();
 }
