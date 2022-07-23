@@ -695,6 +695,7 @@ void NvgWindow::drawSpeed(QPainter &p) {
 
 
   const auto lmd = sm["liveMapData"].getLiveMapData();
+  const uint64_t lmd_fix_time = lmd.getLastGpsTimestamp();
   const uint64_t current_ts = std::chrono::duration_cast<std::chrono::milliseconds>
       (std::chrono::system_clock::now().time_since_epoch()).count();
   const bool show_road_name = current_ts - lmd_fix_time < 10000; // hide if fix older than 10s
