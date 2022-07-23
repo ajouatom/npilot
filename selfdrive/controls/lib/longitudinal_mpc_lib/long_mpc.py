@@ -421,6 +421,8 @@ class LongitudinalMpc:
     # 정지준비가 되어 있을때, x에서 정지.. (stopline에서 정지가 맞지않나?, x나 stopline이나 비슷~)
     elif x[N] < 140.0 and self.on_stopping and self.e2eMode:
       xstate = "STOPPING"
+      if stopline[N] == 400.0:
+        self.on_stopping = False
       #x_obstacles = np.column_stack([lead_0_obstacle, lead_1_obstacle, cruise_obstacle*1., x])
       x_obstacles = np.column_stack([lead_0_obstacle, lead_1_obstacle, cruise_obstacle*1., x if x[N]<stopline[N] else stopline])
     else:
