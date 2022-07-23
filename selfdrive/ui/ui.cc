@@ -89,6 +89,8 @@ static void update_stop_line_data(const UIState *s, const cereal::ModelDataV2::S
   if(calib_frame_to_full_frame(s, line_x + x_off, line_y + y_off, line_z + z_off, &point)) points+=point;
   if(calib_frame_to_full_frame(s, line_x - x_off, line_y + y_off, line_z + z_off, &point)) points+=point;
   if(calib_frame_to_full_frame(s, line_x - x_off, line_y - y_off, line_z + z_off, &point)) points+=point;
+
+  *pvd = points;
 }
 
 
@@ -127,7 +129,7 @@ static void update_model(UIState *s, const cereal::ModelDataV2::Reader &model) {
   if (1) {//scene.stop_line) {
     const auto stop_line = model.getStopLine();
     if (stop_line.getProb() > .005) {
-      update_stop_line_data(s, stop_line, 10.5, 2, 1.22, &scene.stop_line_vertices);
+      update_stop_line_data(s, stop_line, .5, 2, 1.22, &scene.stop_line_vertices);
     }
   }
 }
