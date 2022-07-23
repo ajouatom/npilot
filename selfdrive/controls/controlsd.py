@@ -841,7 +841,7 @@ class Controls:
     controlsState.vCruise = float(self.v_cruise_kph)
 
     #ajouatom
-    controlsState.vCruiseTarget = float(self.cruise_helper.v_cruise_kph_backup)
+    controlsState.vCruiseTarget = float(self.cruise_helper.v_cruise_kph_backup) if not self.cruise_helper.cruiseSuspended else 0
     controlsState.activateE2E = self.cruise_helper.activate_E2E
     controlsState.debugText1 = self.debugText1
     controlsState.debugText2 = self.debugText2
