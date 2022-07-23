@@ -718,7 +718,8 @@ void NvgWindow::drawMaxSpeed(QPainter &p) {
   float applyMaxSpeed = cs.getVCruiseTarget();// scc_smoother.getApplyMaxSpeed();
   float cruiseMaxSpeed = cs.getVCruise();// scc_smoother.getCruiseMaxSpeed();
 
-  bool is_cruise_set = (cruiseMaxSpeed > 0 && cruiseMaxSpeed < 255);
+  //bool is_cruise_set = (cruiseMaxSpeed > 0 && cruiseMaxSpeed < 255);
+  bool is_cruise_set = (applyMaxSpeed > 0 && applyMaxSpeed < 255);
 
   int activeNDA = road_limit_speed.getActive();
   int roadLimitSpeed = road_limit_speed.getRoadLimitSpeed();
