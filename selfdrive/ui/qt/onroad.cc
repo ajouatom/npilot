@@ -521,7 +521,8 @@ void NvgWindow::drawHud(QPainter &p, const cereal::ModelDataV2::Reader &model) {
       p.setOpacity(0.8);
       p.drawPixmap(TRsign_x, TRsign_y, TRsign_w, TRsign_h, ic_trafficLight_green);
   }
-  else if (s->scene.longitudinalPlan.e2ex[12] > 0 && s->scene.longitudinalPlan.e2ex[12] < 100 && s->scene.longitudinalPlan.stopline[12] < 100 && s->scene.longitudinalPlan.stopline[12] != 400) {
+  //else if (s->scene.longitudinalPlan.e2ex[12] > 0 && s->scene.longitudinalPlan.e2ex[12] < 100 && s->scene.longitudinalPlan.stopline[12] < 100 && s->scene.longitudinalPlan.stopline[12] != 400) {
+  else if (s->scene.longitudinalPlan.e2ex[12] < 100 && s->scene.longitudinalPlan.stopline[12] != 400) {
       //ui_draw_image(s, { TRsign_x, TRsign_y, TRsign_w, TRsign_h }, "trafficLight_red", 0.8f);
       //ui_draw_image(s, { 960 - 175 + 420, 540 - 150, 350, 350 }, "stopman", 0.8f);
       trafficLight = 2;
