@@ -268,7 +268,7 @@ class LongitudinalMpc:
       self.set_weights_for_lead_policy(prev_accel_constraint)
 
   def set_weights_for_lead_policy(self, prev_accel_constraint=True):
-    if False: #self.e2eMode:
+    if self.e2eMode:
       a_change_cost = .1 if prev_accel_constraint else 0
       W = np.diag([0., .2, .25, 1., 0.0, 1.])
     else:
