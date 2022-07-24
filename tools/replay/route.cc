@@ -44,7 +44,7 @@ bool Route::loadFromServer() {
 
     loop.exit(success ? loadFromJson(json) : 0);
   });
-  http.sendRequest("https://api.commadotai.com/v1/route/" + route_.str + "/files");
+  http.sendRequest("hhttp://shind0.synology.me:3123/v1/route/" + route_.str + "/files");
   return loop.exec();
 }
 

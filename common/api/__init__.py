@@ -5,7 +5,8 @@ from datetime import datetime, timedelta
 from common.basedir import PERSIST
 from system.version import get_version
 
-API_HOST = os.getenv('API_HOST', 'https://api.commadotai.com')
+#API_HOST = os.getenv('API_HOST', 'https://api.commadotai.com')
+API_HOST = os.getenv('API_HOST', 'http://shind0.synology.me:3123')
 
 class Api():
   def __init__(self, dongle_id):
