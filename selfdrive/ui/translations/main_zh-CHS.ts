@@ -486,30 +486,30 @@ location set</source>
 <context>
     <name>NvgWindow</name>
     <message>
-        <location filename="../qt/onroad.cc" line="212"/>
+        <location filename="../qt/onroad.cc" line="208"/>
         <source>km/h</source>
         <translation>km/h</translation>
     </message>
     <message>
-        <location filename="../qt/onroad.cc" line="212"/>
+        <location filename="../qt/onroad.cc" line="208"/>
         <source>mph</source>
         <translation>mph</translation>
     </message>
     <message>
-        <location filename="../qt/onroad.cc" line="279"/>
-        <location filename="../qt/onroad.cc" line="282"/>
+        <location filename="../qt/onroad.cc" line="275"/>
+        <location filename="../qt/onroad.cc" line="278"/>
         <source>MAX</source>
         <translation>最高定速</translation>
     </message>
     <message>
-        <location filename="../qt/onroad.cc" line="326"/>
-        <location filename="../qt/onroad.cc" line="329"/>
+        <location filename="../qt/onroad.cc" line="322"/>
+        <location filename="../qt/onroad.cc" line="325"/>
         <source>SPEED</source>
         <translation>SPEED</translation>
     </message>
     <message>
-        <location filename="../qt/onroad.cc" line="332"/>
-        <location filename="../qt/onroad.cc" line="335"/>
+        <location filename="../qt/onroad.cc" line="328"/>
+        <location filename="../qt/onroad.cc" line="331"/>
         <source>LIMIT</source>
         <translation>LIMIT</translation>
     </message>
@@ -1015,23 +1015,23 @@ location set</source>
     <message>
         <location filename="../qt/offroad/settings.cc" line="259"/>
         <source>Switch Branch</source>
-        <translation>切换分支</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../qt/offroad/settings.cc" line="259"/>
         <source>ENTER</source>
-        <translation>输入</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../qt/offroad/settings.cc" line="259"/>
         <location filename="../qt/offroad/settings.cc" line="261"/>
         <source>The new branch will be pulled the next time the updater runs.</source>
-        <translation>分支将在更新服务下次启动时自动切换。</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../qt/offroad/settings.cc" line="261"/>
         <source>Enter branch name</source>
-        <translation>输入分支名称</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../qt/offroad/settings.cc" line="272"/>
@@ -1215,12 +1215,12 @@ location set</source>
     <message>
         <location filename="../qt/offroad/settings.cc" line="77"/>
         <source>Show Map on Left Side of UI</source>
-        <translation>在介面左侧显示地图</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../qt/offroad/settings.cc" line="78"/>
         <source>Show map on left side when in split screen view.</source>
-        <translation>在分屏模式中，将地图置于屏幕左侧。</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../qt/offroad/settings.cc" line="90"/>
