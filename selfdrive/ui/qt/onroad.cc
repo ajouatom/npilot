@@ -702,6 +702,15 @@ void NvgWindow::drawSpeed(QPainter &p) {
   QString str1;
   str1 = show_road_name ? QString::fromStdString(lmd.getCurrentRoadName()) : "";
   drawText(p, rect().center().x(), 310, str1, 200);
+  
+  
+    // ajouatom: 현재시간표시
+  QTextOption  textOpt = QTextOption(Qt::AlignLeft);
+  configFont(p, "Open Sans", 120, "Bold");
+  p.drawText(QRect(250, 50, width(), 500), QDateTime::currentDateTime().toString("hh:mmap"), textOpt);
+  configFont(p, "Open Sans", 60, "Bold");
+  p.drawText(QRect(250, 50+150, width(), 500), QDateTime::currentDateTime().toString("yyyy-MM-dd(ddd)"), textOpt);
+
 
   p.restore();
 }
