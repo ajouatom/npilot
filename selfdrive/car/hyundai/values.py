@@ -34,7 +34,7 @@ class CarControllerParams:
       self.STEER_MAX = 255
 
     elif CP.carFingerprint in (CAR.SANTA_FE_HEV_2022):
-      self.STEER_MAX = 350
+      self.STEER_MAX = 255
     # Default for most HKG
     else:
       self.STEER_MAX = 384
