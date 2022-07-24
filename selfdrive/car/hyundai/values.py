@@ -33,7 +33,7 @@ class CarControllerParams:
                                CAR.KIA_OPTIMA_H, CAR.KIA_SORENTO, CAR.KIA_STINGER):
       self.STEER_MAX = 255
 
-    elif CP.carFingerprint in (CAR.SANTA_FE_PHEV_2022):
+    elif CP.carFingerprint in (CAR.SANTA_FE_HEV_2022):
       self.STEER_MAX = 350
     # Default for most HKG
     else:
