@@ -436,8 +436,8 @@ class LongitudinalMpc:
         #cruise_obstacle = cruise_obstacle * self.SpeedWeightE2E
         x2 = x * self.SpeedWeightE2E
         cruise_weight = 1.0 - model.stopLine.prob
-        if cruise_weight > 0.4:
-          cruise_weight = 0.4
+        if cruise_weight < 0.5:
+          cruise_weight = 0.5
         cruise_obstacle = cruise_obstacle * cruise_weight
         x_obstacles = np.column_stack([lead_0_obstacle, lead_1_obstacle, cruise_obstacle if cruise_obstacle[0]<x2[N] else x2])
       else:
