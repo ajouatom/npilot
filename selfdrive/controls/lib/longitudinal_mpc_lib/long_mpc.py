@@ -415,7 +415,7 @@ class LongitudinalMpc:
     # 모델x 100이하, 정지라인이 100이하이면 크루즈 또는 정지라인에서 정지 준비...
     # 40M이상 차이가 나면, 그냥 지나가자... 
     elif x[N] < 140.0 and stopline[N] < 100.0 and self.e2eMode:
-      xstate = "PREP"
+      xstate = "STOPPING"
       self.on_stopping = True
       if x[N] - stopline[N] < 40.0: # 모델x와 stop.x의 차이가 xx 미만인 경우 정지선에 정지.
         x_obstacles = np.column_stack([lead_0_obstacle, lead_1_obstacle, cruise_obstacle*1., (stopline*0.5)+(x*0.5)])  #모델x와 stopline의 중간값.
@@ -424,7 +424,7 @@ class LongitudinalMpc:
         x_obstacles = np.column_stack([lead_0_obstacle, lead_1_obstacle, cruise_obstacle*1., x]) # x가 크므로 x기준으로 속도를 줄여~
     # 정지준비가 되어 있을때, x에서 정지.. (stopline에서 정지가 맞지않나?, x나 stopline이나 비슷~)
     elif x[N] < 140.0 and self.on_stopping and self.e2eMode:
-      xstate = "STOPPING"
+      xstate = "STOPPING2"
       if stopline[N] == 400.0 or x[N] - stopline[N] > 40.0:
         self.on_stopping = False
       #x_obstacles = np.column_stack([lead_0_obstacle, lead_1_obstacle, cruise_obstacle*1., x])
