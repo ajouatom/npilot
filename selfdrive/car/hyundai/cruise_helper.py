@@ -53,6 +53,8 @@ class CruiseHelper:
     self.active_cam = False
     self.over_speed_limit = False
 
+    self.roadLimitSpeed = 0.0
+
     self.update_params(0, True)
 
   def update_params(self, frame, all):
@@ -210,13 +212,13 @@ class CruiseHelper:
       if apply_limit_speed > 0:
         spdNaviLimit = apply_limit_speed
 
-    roadLimitSpeed = controls.sm['roadLimitSpeed'].roadLimitSpeed
+    self.roadLimitSpeed = controls.sm['roadLimitSpeed'].roadLimitSpeed
     if self.autoRoadLimitCtrl == 1:
-      if roadLimitSpeed > 0:
-        spdRoadLimit = min(spdTarget, roadLimitSpeed)
+      if self.roadLimitSpeed > 0:
+        spdRoadLimit = min(spdTarget, self.roadLimitSpeed)
     elif self.autoRoadLimitCtrl == 2:
-      if roadLimitSpeed > 0:
-        spdRoadLimit = roadLimitSpeed
+      if self.roadLimitSpeed > 0:
+        spdRoadLimit = self.roadLimitSpeed
         spdTarget = spdRoadLimit
 
     spdTarget = min(spdTarget, spdNaviLimit, spdRoadLimit)
@@ -363,6 +365,10 @@ class CruiseHelper:
       elif button_type == ButtonType.accelCruise:
         self.cruise_resume(controls, CS)
 
+        if self.roadLimitSpeed > 0.0 and v_cruise_kph < self.roadLimitSpeed:
+          v_cruise_kph = self.roadLimitSpeed
+
+
         # current속도가 set도보다 느리면 current속도 바꿈. 
         if self.v_cruise_kph_current < v_cruise_kph:
           self.v_cruise_kph_current = v_cruise_kph
@@ -401,6 +407,8 @@ class CruiseHelper:
         else:          
           if vEgo_cruise_kph < v_cruise_kph:
             v_cruise_kph = vEgo_cruise_kph + 0.0
+          if self.roadLimitSpeed > 0.0 and v_cruise_kph > self.roadLimitSpeed:
+            v_cruise_kph = self.roadLimitSpeed
           self.v_cruise_kph_backup = v_cruise_kph
           self.v_cruise_kph_current = v_cruise_kph
 
